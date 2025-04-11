@@ -1,8 +1,10 @@
 package com.gameengine.test;
 
 import com.gameengine.core.ILogic;
+import com.gameengine.core.ObjectLoader;
 import com.gameengine.core.RenderManager;
 import com.gameengine.core.WindowManager;
+import com.gameengine.core.entity.Model;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
@@ -11,16 +13,29 @@ public class TestGame implements ILogic {
     private float colour = 0.0f;
     private final RenderManager renderer;
     private final WindowManager window;
+    private final ObjectLoader loader;
+
+    private Model model;
 
 
     public TestGame() {
         renderer = new RenderManager();
         window = Launcher.getWindow();
+        loader = new ObjectLoader();
     }
 
     @Override
     public void init() throws Exception {
         renderer.init();
+        float[] SampleVertices = {
+                -0.5f, 0.5f, 0f,
+                -0.5f, -0.5f, 0f,
+                0.5f, -0.5f, 0f,
+                0.5f, -0.5f, 0f,
+                0.5f, 0.5f, 0f,
+                -0.5f, 0.5f, 0f
+        };
+        model = loader.loadModel(SampleVertices);
     }
 
     @Override
@@ -50,11 +65,13 @@ public class TestGame implements ILogic {
         }
 
         window.setClearColour(colour, colour, colour, 0.0f);
-        renderer.clear();
+        renderer.render(model);
+
     }
 
     @Override
     public void cleanup() {
         renderer.cleanup();
+        loader.cleanup();
     }
 }
