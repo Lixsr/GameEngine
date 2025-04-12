@@ -27,7 +27,7 @@ public class TestGame implements ILogic {
     @Override
     public void init() throws Exception {
         renderer.init();
-        float[] SampleVertices = {
+        float[] vertices = {
                 -0.5f, 0.5f, 0f,
                 -0.5f, -0.5f, 0f,
                 0.5f, -0.5f, 0f,
@@ -35,7 +35,12 @@ public class TestGame implements ILogic {
                 0.5f, 0.5f, 0f,
                 -0.5f, 0.5f, 0f
         };
-        model = loader.loadModel(SampleVertices);
+
+        int[] indices = {
+                0,1,3,
+                3,1,2
+        };
+        model = loader.loadModel(vertices, indices);
     }
 
     @Override
