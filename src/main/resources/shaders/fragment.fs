@@ -20,11 +20,22 @@ struct DirectionalLight {
     float intensity;
 };
 
+struct PointLight {
+    vec3 colour;
+    vec3 position;
+    float intensity;
+    float constant;
+    float linear;
+    float exponent;
+};
+
+
 uniform sampler2D textureSampler;
 uniform vec3 ambientLight;
 uniform Material material;
 uniform float specularPower;
 uniform DirectionalLight directionalLight;
+uniform PointLight pointLight;
 
 vec4 ambientC;
 vec4 diffuseC;
@@ -44,7 +55,7 @@ void setupColors(Material material, vec2 textCoords){
         fragColor = ambientC + vec4(ambientLight, 1);
 }
 
-vec4 calcLightColor(vec3 light_color, float light_intensity, vec3 position, vec3 to_light_dir, vec3 normal){
+vec4 calcLightColour(vec3 light_color, float light_intensity, vec3 position, vec3 to_light_dir, vec3 normal){
     vec4 diffuseColor = vec4(0, 0, 0, 0);
     vec4 specularColor = vec4(0, 0, 0, 0);
 
@@ -64,12 +75,22 @@ vec4 calcLightColor(vec3 light_color, float light_intensity, vec3 position, vec3
 }
 
 vec4 calcDirectionalLight(DirectionalLight light, vec3 position, vec3 normal){
-    return calcLightColor(light.color, light.intensity, position, normalize(light.direction), normal);
+    return calcLightColour(light.color, light.intensity, position, normalize(light.direction), normal);
+}
+vec4 calcPointLight(PointLight light, vec3 position, vec3 normal) {
+    vec3 light_dir = light.position - position;
+    vec3 to_light_dir = normalize(light_dir);
+    vec4 light_colour = calcLightColour(light.colour, light.intensity, position, to_light_dir, normal);
+
+    // attenuation
+    float distance = length(light_dir);
+    float attenuationInv = light.constant + light.linear * distance + light.exponent * distance * distance;
+    return light_colour / attenuationInv;
 }
 void main() {
     setupColors(material, fragTextureCoord);
 
     vec4 diffuseSpecularComp = calcDirectionalLight(directionalLight, fragPos, fragNormal);
-
+    diffuseSpecularComp += calcPointLight(pointLight, fragPos, fragNormal);
     fragColor = ambientC * vec4(ambientLight, 1) + diffuseSpecularComp;
 }

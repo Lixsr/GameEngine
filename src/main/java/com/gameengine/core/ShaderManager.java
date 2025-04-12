@@ -2,6 +2,7 @@ package com.gameengine.core;
 
 import com.gameengine.core.entity.Material;
 import com.gameengine.core.lighting.DirectionalLight;
+import com.gameengine.core.lighting.PointLight;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -41,6 +42,24 @@ public class ShaderManager {
         setUniform(uniformName + ".color", directionalLight.getColor());
         setUniform(uniformName + ".direction", directionalLight.getDirection());
         setUniform(uniformName + ".intensity", directionalLight.getIntensity());
+    }
+
+    public void createPointLightUniform(String uniformName) throws Exception {
+        createUniform(uniformName + ".colour");
+        createUniform(uniformName + ".position");
+        createUniform(uniformName + ".intensity");
+        createUniform(uniformName + ".constant");
+        createUniform(uniformName + ".linear");
+        createUniform(uniformName + ".exponent");
+    }
+
+    public void setUniform(String uniformName, PointLight pointLight){
+        setUniform(uniformName + ".colour", pointLight.getColour());
+        setUniform(uniformName + ".position", pointLight.getPosition());
+        setUniform(uniformName + ".intensity", pointLight.getIntensity());
+        setUniform(uniformName + ".constant", pointLight.getConstant());
+        setUniform(uniformName + ".linear", pointLight.getLinear());
+        setUniform(uniformName + ".exponent", pointLight.getExponent());
     }
 
     public void createMaterialUniform(String uniformName) throws Exception {

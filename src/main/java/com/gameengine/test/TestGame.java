@@ -5,11 +5,12 @@ import com.gameengine.core.entity.Entity;
 import com.gameengine.core.entity.Model;
 import com.gameengine.core.entity.Texture;
 import com.gameengine.core.lighting.DirectionalLight;
+import com.gameengine.core.lighting.PointLight;
 import com.gameengine.core.utils.Consts;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
+
 
 public class TestGame implements ILogic {
     private static final float CAMERA_MOVE_SPEED = 0.05f;
@@ -25,6 +26,7 @@ public class TestGame implements ILogic {
 
     private float lightAngle;
     private DirectionalLight directionalLight;
+    private PointLight pointLight;
 
 
     public TestGame() {
@@ -34,18 +36,25 @@ public class TestGame implements ILogic {
         camera = new Camera();
         cameraInc = new Vector3f();
         lightAngle = -90;
+
     }
 
     @Override
     public void init() throws Exception {
         renderer.init();
 
-        Model model = loader.loadOBJModel("/models/bunny.obj");
+        Model model = loader.loadOBJModel("/models/cube.obj");
         model.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")), 1f);
         entity = new Entity(model, new Vector3f(0, 0, -5), new Vector3f(0, 0, 0), 1);
-        float lightIntensity = 0.0f;
-        Vector3f lightPosition = new Vector3f(-1, -10, 0);
+
+        float lightIntensity = 1.0f;
+        Vector3f lightPosition = new Vector3f(0, -0, -3.2f);
         Vector3f lightColour = new Vector3f(1, 1, 1);
+        pointLight = new PointLight(lightColour, lightPosition, lightIntensity, 0, 0, 1);
+
+
+        lightPosition = new Vector3f(-1, -10, 0);
+        lightColour = new Vector3f(1, 1, 1);
         directionalLight = new DirectionalLight(lightColour, lightPosition, lightIntensity);
     };
 
@@ -70,12 +79,17 @@ public class TestGame implements ILogic {
         if (window.isKeyPressed(GLFW.GLFW_KEY_E)) {
             cameraInc.y = 1;
         }
+        if (window.isKeyPressed(GLFW.GLFW_KEY_O)) {
+            pointLight.getPosition().x += 0.1f;
+        }
+        if (window.isKeyPressed(GLFW.GLFW_KEY_P)) {
+            pointLight.getPosition().x -= 0.1f;
+        }
     }
 
     @Override
     public void update(float interval, MouseInput mouseInput) {
         camera.movePosition(cameraInc.x * Consts.CAMERA_STEP, cameraInc.y * Consts.CAMERA_STEP, cameraInc.z * Consts.CAMERA_STEP);
-        entity.incRotation(0.0f, 0.5f, 0.0f);
 
         if(mouseInput.isRightButtonPress()) {
             Vector2f rotVec = mouseInput.getDisplVec();
@@ -105,7 +119,7 @@ public class TestGame implements ILogic {
 
     @Override
     public void render() {
-        renderer.render(entity, camera, directionalLight);
+        renderer.render(entity, camera, directionalLight, pointLight);
 
     }
 
