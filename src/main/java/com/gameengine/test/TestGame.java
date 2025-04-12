@@ -4,8 +4,10 @@ import com.gameengine.core.ILogic;
 import com.gameengine.core.ObjectLoader;
 import com.gameengine.core.RenderManager;
 import com.gameengine.core.WindowManager;
+import com.gameengine.core.entity.Entity;
 import com.gameengine.core.entity.Model;
 import com.gameengine.core.entity.Texture;
+import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
@@ -16,7 +18,7 @@ public class TestGame implements ILogic {
     private final WindowManager window;
     private final ObjectLoader loader;
 
-    private Model model;
+    private Entity entity;
 
 
     public TestGame() {
@@ -46,9 +48,10 @@ public class TestGame implements ILogic {
                 1,1,
                 1,0,
         };
-        model = loader.loadModel(vertices, textureCoords, indices);
+        Model model = loader.loadModel(vertices, textureCoords, indices);
         model.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")));
-    }
+        entity = new Entity(model, new Vector3f(1, 0, 0), new Vector3f(0, 0, 0), 1);
+    };
 
     @Override
     public void input() {
@@ -67,6 +70,9 @@ public class TestGame implements ILogic {
             colour = 1.0f;
         else if (colour <= 0)
             colour = 0.0f;
+        if (entity.getPos().x < -1.5f)
+            entity.getPos().x = 1.5f;
+        entity.getPos().x -= 0.01f;
     }
 
     @Override
@@ -77,7 +83,7 @@ public class TestGame implements ILogic {
         }
 
         window.setClearColour(colour, colour, colour, 0.0f);
-        renderer.render(model);
+        renderer.render(entity);
 
     }
 
