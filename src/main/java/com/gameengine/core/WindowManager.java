@@ -119,7 +119,7 @@ public class WindowManager {
         this.resize = resize;
     }
 
-    public long getWindow() {
+    public long getWindowHandle() {
         return window;
     }
 

@@ -4,6 +4,8 @@ import com.gameengine.core.*;
 import com.gameengine.core.entity.Entity;
 import com.gameengine.core.entity.Model;
 import com.gameengine.core.entity.Texture;
+import com.gameengine.core.utils.Consts;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
@@ -113,9 +115,15 @@ public class TestGame implements ILogic {
     }
 
     @Override
-    public void update() {
-        camera.movePosition(cameraInc.x * CAMERA_MOVE_SPEED, cameraInc.y * CAMERA_MOVE_SPEED, cameraInc.z * CAMERA_MOVE_SPEED);
+    public void update(float interval, MouseInput mouseInput) {
+        camera.movePosition(cameraInc.x * Consts.CAMERA_STEP, cameraInc.y * Consts.CAMERA_STEP, cameraInc.z * Consts.CAMERA_STEP);
         entity.incRotation(0.0f, 0.5f, 0.0f);
+
+        if(mouseInput.isRightButtonPress()) {
+            Vector2f rotVec = mouseInput.getDisplVec();
+            camera.moveRotation(rotVec.x * Consts.MOUSE_SENSITIVITY, rotVec.y * Consts.MOUSE_SENSITIVITY, 0);
+        }
+        entity.incRotation(0, 0.5f, 0);
     }
 
     @Override
