@@ -1,9 +1,9 @@
 package com.gameengine.core;
 
 import com.gameengine.core.entity.Entity;
-import com.gameengine.core.entity.Model;
 import com.gameengine.core.lighting.DirectionalLight;
 import com.gameengine.core.lighting.PointLight;
+import com.gameengine.core.lighting.SpotLight;
 import com.gameengine.core.utils.Consts;
 import com.gameengine.core.utils.Transformation;
 import com.gameengine.core.utils.Utils;
@@ -34,11 +34,13 @@ public class RenderManager {
         shader.createUniform("specularPower");
         shader.createDirectionalLightUniform("directionalLight");
         shader.createPointLightUniform("pointLight");
+        shader.createSpotLightUniform("spotLight");
+
 
 
 
     }
-    public void render(Entity entity, Camera camera, DirectionalLight directionalLight, PointLight pointLight) {
+    public void render(Entity entity, Camera camera, DirectionalLight directionalLight, PointLight pointLight, SpotLight spotLight) {
         clear();
         if(window.isResize()){
             GL11.glViewport(0,0, window.getWidth(), window.getHeight());
@@ -54,6 +56,7 @@ public class RenderManager {
         shader.setUniform("specularPower", Consts.SPECULAR_POWER);
         shader.setUniform("directionalLight", directionalLight);
         shader.setUniform("pointLight", pointLight);
+        shader.setUniform("spotLight", spotLight);
 
 
         GL30.glBindVertexArray(entity.getModel().getId());
