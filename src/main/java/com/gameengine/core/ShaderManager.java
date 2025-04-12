@@ -1,6 +1,7 @@
 package com.gameengine.core;
 
 import com.gameengine.core.entity.Material;
+import com.gameengine.core.lighting.DirectionalLight;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -29,6 +30,17 @@ public class ShaderManager {
             throw new Exception("Could not find uniform " + uniformName);
         }
         uniforms.put(uniformName, uniformLocation);
+    }
+
+    public void createDirectionalLightUniform(String uniformName) throws Exception {
+        createUniform(uniformName + ".color");
+        createUniform(uniformName + ".direction");
+        createUniform(uniformName + ".intensity");
+    }
+    public void setUniform(String uniformName, DirectionalLight directionalLight){
+        setUniform(uniformName + ".color", directionalLight.getColor());
+        setUniform(uniformName + ".direction", directionalLight.getDirection());
+        setUniform(uniformName + ".intensity", directionalLight.getIntensity());
     }
 
     public void createMaterialUniform(String uniformName) throws Exception {
@@ -76,18 +88,6 @@ public class ShaderManager {
     }
 
 
-
-
-
-
-
-
-
-    public void createDirectionalLightUniform(String uniformName) throws Exception {
-        createUniform(uniformName + ".color");
-        createUniform(uniformName + ".direction");
-        createUniform(uniformName + ".intensity");
-    }
 
     public void createVertexShader(String shaderCode) throws Exception {
         vertexShaderID = createShader(shaderCode, GL20.GL_VERTEX_SHADER);
