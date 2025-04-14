@@ -113,7 +113,6 @@ vec4 calcSpotLight(SpotLight light, vec3 position, vec3 normal) {
     return colour;
 }
 
-
 void main() {
     setupColors(material, fragTextureCoord);
 

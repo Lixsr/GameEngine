@@ -7,6 +7,7 @@ import com.gameengine.core.entity.Texture;
 import com.gameengine.core.lighting.DirectionalLight;
 import com.gameengine.core.lighting.PointLight;
 import com.gameengine.core.lighting.SpotLight;
+import com.gameengine.core.rendering.RenderManager;
 import com.gameengine.core.utils.Consts;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -15,7 +16,6 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.awt.*;
 import java.util.Random;
 
 
