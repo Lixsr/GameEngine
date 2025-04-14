@@ -89,14 +89,18 @@ vec4 calcDirectionalLight(DirectionalLight light, vec3 position, vec3 normal){
 }
 vec4 calcPointLight(PointLight light, vec3 position, vec3 normal) {
     vec3 light_dir = light.position - position;
+    float distance = length(light_dir);
     vec3 to_light_dir = normalize(light_dir);
+
     vec4 light_colour = calcLightColour(light.colour, light.intensity, position, to_light_dir, normal);
 
-    // attenuation
-    float distance = length(light_dir);
-    float attenuationInv = light.constant + light.linear * distance + light.exponent * distance * distance;
-    return light_colour / attenuationInv;
+    // Attenuation calculation with clamping for stability
+    float attenuation = light.constant + light.linear * distance + light.exponent * distance * distance;
+    attenuation = max(attenuation, 0.001); // Prevent division by zero or too small values
+
+    return light_colour / attenuation;
 }
+
 vec4 calcSpotLight(SpotLight light, vec3 position, vec3 normal) {
     vec3 light_dir = light.pl.position - position;
     vec3 to_light_dir = normalize(light_dir);
