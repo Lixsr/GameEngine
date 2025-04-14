@@ -17,18 +17,21 @@ public class Material {
     }
 
     public Material(Vector4f color, float reflectance) {
-        this(color, color, color, reflectance, null);
+        this(color, color, color, null, reflectance);
     }
 
     public Material(Vector4f color, float reflectance, Texture texture) {
-        this(color, color, color, reflectance, texture);
+        this(color, color, color, null, reflectance);
     }
 
     public Material(Texture texture) {
-        this(Consts.DEFAULT_COLOR, Consts.DEFAULT_COLOR, Consts.DEFAULT_COLOR, 0, null);
+        this(Consts.DEFAULT_COLOR, Consts.DEFAULT_COLOR, Consts.DEFAULT_COLOR, texture, 0);
+    }
+    public Material(Texture texture, float reflectance) {
+        this(Consts.DEFAULT_COLOR, Consts.DEFAULT_COLOR, Consts.DEFAULT_COLOR, texture, reflectance);
     }
 
-    public Material(Vector4f ambientColor, Vector4f diffuseColor, Vector4f specularColor, float reflectance, Texture texture) {
+    public Material(Vector4f ambientColor, Vector4f diffuseColor, Vector4f specularColor, Texture texture, float reflectance) {
         this.ambientColor = ambientColor;
         this.diffuseColor = diffuseColor;
         this.specularColor = specularColor;

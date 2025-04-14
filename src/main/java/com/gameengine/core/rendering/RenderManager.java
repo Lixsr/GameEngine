@@ -4,10 +4,10 @@ import com.gameengine.core.Camera;
 import com.gameengine.core.ShaderManager;
 import com.gameengine.core.WindowManager;
 import com.gameengine.core.entity.Entity;
-import com.gameengine.core.entity.Model;
 import com.gameengine.core.lighting.DirectionalLight;
 import com.gameengine.core.lighting.PointLight;
 import com.gameengine.core.lighting.SpotLight;
+import com.gameengine.core.terrain.Terrain;
 import com.gameengine.core.utils.Consts;
 import com.gameengine.test.Launcher;
 import org.lwjgl.opengl.GL11;
@@ -19,14 +19,19 @@ import java.util.List;
 
 public class RenderManager {
     private final WindowManager window;
-    private EntityRender entityRenderer;
+    private EntityRenderer entityRenderer;
+    private TerrainRenderer terrainRenderer;
 
     public RenderManager(){
         window = Launcher.getWindow();
     }
+
+
     public void init() throws Exception {
-        entityRenderer = new EntityRender();
+        entityRenderer = new EntityRenderer();
+        terrainRenderer = new TerrainRenderer();
         entityRenderer.init();
+        terrainRenderer.init();
     }
 
 
@@ -52,6 +57,7 @@ public class RenderManager {
             window.setResize(false);
         }
         entityRenderer.render(camera, pointLights, spotLights, directionalLight);
+        terrainRenderer.render(camera, pointLights, spotLights, directionalLight);
     }
 
     public void processEntity(Entity entity){
@@ -63,8 +69,9 @@ public class RenderManager {
             newEntityList.add(entity);
             entityRenderer.getEntities().put(entity.getModel(), newEntityList);
         }
-
-
+    }
+    public void processTerrain(Terrain terrain){
+        terrainRenderer.getTerrain().add(terrain);
     }
 
     public void clear() {
@@ -73,5 +80,6 @@ public class RenderManager {
 
     public void cleanup() {
         entityRenderer.cleanup();
+        terrainRenderer.cleanup();
     }
 }

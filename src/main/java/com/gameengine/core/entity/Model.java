@@ -6,9 +6,7 @@ public class Model {
     private Material material;
 
     public Model(int id, int vertexCount) {
-        this.id = id;
-        this.vertexCount = vertexCount;
-        this.material = new Material();
+        this(id, vertexCount, null);
     }
 
     public Model(int id, int vertexCount, Texture texture) {

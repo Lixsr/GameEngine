@@ -7,6 +7,7 @@ import com.gameengine.core.entity.Model;
 import com.gameengine.core.lighting.DirectionalLight;
 import com.gameengine.core.lighting.PointLight;
 import com.gameengine.core.lighting.SpotLight;
+import com.gameengine.core.utils.Consts;
 import com.gameengine.core.utils.Transformation;
 import com.gameengine.core.utils.Utils;
 import com.gameengine.test.Launcher;
@@ -19,12 +20,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class EntityRender implements IRenderer {
+public class EntityRenderer implements IRenderer {
 
     ShaderManager shader;
     private Map<Model, List<Entity>> entities;
 
-    public EntityRender() throws Exception {
+    public EntityRenderer() throws Exception {
         entities = new HashMap<>();
         shader = new ShaderManager();
     }
@@ -33,8 +34,8 @@ public class EntityRender implements IRenderer {
 
     @Override
     public void init() throws Exception {
-        shader.createVertexShader(Utils.loadResource("/shaders/vertex.vs"));
-        shader.createFragmentShader(Utils.loadResource("/shaders/fragment.fs"));
+        shader.createVertexShader(Utils.loadResource("/shaders/entity_vertex.vs"));
+        shader.createFragmentShader(Utils.loadResource("/shaders/entity_fragment.fs"));
         shader.link();
         shader.createUniform("textureSampler");
         shader.createUniform("transformationMatrix");
@@ -45,8 +46,8 @@ public class EntityRender implements IRenderer {
         shader.createUniform("specularPower");
         shader.createDirectionalLightUniform("directionalLight");
         // maximum 5 per list
-        shader.createPointLightListUniform("pointLights", 5);
-        shader.createSpotLightListUniform("spotLights", 5);
+        shader.createPointLightListUniform("pointLights", Consts.MAX_POINT_LIGHTS);
+        shader.createSpotLightListUniform("spotLights", Consts.MAX_SPOT_LIGHTS);
     }
 
     @Override

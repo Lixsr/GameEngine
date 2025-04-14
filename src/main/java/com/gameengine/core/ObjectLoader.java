@@ -35,7 +35,7 @@ public class ObjectLoader {
         List<Vector3i> faces = new ArrayList<>();
 
         for (String line : lines) {
-            String[] tokens = line.split("\\s");
+            String[] tokens = line.split("\\s+");
 
             switch (tokens[0]) {
                 case "v":
@@ -66,9 +66,12 @@ public class ObjectLoader {
                     break;
                 case "f":
                     //faces
-                    processFace(tokens[1], faces);
-                    processFace(tokens[2], faces);
-                    processFace(tokens[3], faces);
+//                    processFace(tokens[1], faces);
+//                    processFace(tokens[2], faces);
+//                    processFace(tokens[3], faces);
+                    for(int i=1; i< tokens.length; i++){
+                        processFace(tokens[i],faces);
+                    }
                     break;
                 default:
                     break;
@@ -97,8 +100,9 @@ public class ObjectLoader {
         return loadModel(verticesArr, texCoordArr, normalArr, indicesArr);
     }
 
-    private static void processVertex(int pos, int texCoord, int normal, List<Vector2f> texCoordList, List<Vector3f>
-            normalList, List<Integer> indicesList, float[] texCoordArr, float[] normalArr) {
+    private static void processVertex(int pos, int texCoord, int normal, List<Vector2f> texCoordList
+            , List<Vector3f> normalList, List<Integer> indicesList
+            , float[] texCoordArr, float[] normalArr) {
 
         indicesList.add(pos);
 
@@ -116,7 +120,7 @@ public class ObjectLoader {
         }
     }
 
-    private static void processFace(String token, List<Vector3i> face) {
+    private static void processFace(String token, List<Vector3i> faces) {
         String[] lineToken = token.split("/");
         int length = lineToken.length;
         int pos = -1, coords = -1, normal = -1;
@@ -130,7 +134,7 @@ public class ObjectLoader {
             }
         }
         Vector3i facesVec = new Vector3i(pos, coords, normal);
-        face.add(facesVec);
+        faces.add(facesVec);
     }
 
 

@@ -2,12 +2,14 @@ package com.gameengine.test;
 
 import com.gameengine.core.*;
 import com.gameengine.core.entity.Entity;
+import com.gameengine.core.entity.Material;
 import com.gameengine.core.entity.Model;
 import com.gameengine.core.entity.Texture;
 import com.gameengine.core.lighting.DirectionalLight;
 import com.gameengine.core.lighting.PointLight;
 import com.gameengine.core.lighting.SpotLight;
 import com.gameengine.core.rendering.RenderManager;
+import com.gameengine.core.terrain.Terrain;
 import com.gameengine.core.utils.Consts;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -27,6 +29,8 @@ public class TestGame implements ILogic {
     private final ObjectLoader loader;
 
     private List<Entity> entities;
+    private List<Terrain> terrains;
+
     private Camera camera;
 
     Vector3f cameraInc;
@@ -105,10 +109,22 @@ public class TestGame implements ILogic {
                 4, 6, 7, 5, 4, 7,
         };
         Model model = loader.loadModel(vertices, textureCoords, indices);
-
 //        Model model = loader.loadOBJModel("/models/cube.obj");
         model.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")), 1f);
-        entities = new ArrayList<Entity>();
+
+
+
+        // Terrains
+        terrains = new ArrayList<>();
+        Terrain terrain1 = new Terrain(new Vector3f(0, -1, -800), loader, new Material(
+                new Texture(loader.loadTexture("textures/terrain.png")),0.1f));
+        Terrain terrain2 = new Terrain(new Vector3f(-800, -1, -800), loader,new Material(
+                new Texture(loader.loadTexture("textures/flowers.png")),0.1f));
+        terrains.add(terrain1);
+        terrains.add(terrain2);
+
+        // Entities
+        entities = new ArrayList<>();
         Random rnd = new Random();
         for (int i = 0; i < 200; i++) {
             float x = rnd.nextFloat() * 100 - 50;
@@ -119,6 +135,21 @@ public class TestGame implements ILogic {
         }
         entities.add(new Entity(model, new Vector3f(0, 0, -2f),
                 new Vector3f(0, 0, 0), 1));
+
+        // Terrain
+        // Custom Terrain
+//        Model model2 = loader.loadOBJModel("/models/complex_terrain.obj");
+//        model2.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")), 1f);
+//        rnd = new Random();
+//        for (int i = 0; i < 1; i++) {
+//            float x = rnd.nextFloat() * 100 - 50;
+//            float y = rnd.nextFloat() * 100 - 50;
+//            float z = rnd.nextFloat() * -300;
+//            entities.add(new Entity(model2, new Vector3f(0, -1, -800),
+//                    new Vector3f(rnd.nextFloat() * 180, rnd.nextFloat() * 180, 0), 1));
+//        }
+//        entities.add(new Entity(model2, new Vector3f(0, 0, -2f),
+//                new Vector3f(0, 0, 0), 1));
 
         float lightIntensity = 1.0f;
         // point light
@@ -196,6 +227,7 @@ public class TestGame implements ILogic {
             spotInc = 1;
         }
 
+        // Move the spot light over time
         double spotAngleRed = Math.toRadians(spotAngle);
         Vector3f coneDir = spotLights[0].getPointLight().getPosition();
         coneDir.y = (float) Math.sin(spotAngleRed);
@@ -223,6 +255,9 @@ public class TestGame implements ILogic {
 
         for (Entity entity : entities) {
             renderer.processEntity(entity);
+        }
+        for (Terrain terrain : terrains) {
+            renderer.processTerrain(terrain);
         }
     }
 
