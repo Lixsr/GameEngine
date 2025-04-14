@@ -27,10 +27,10 @@ public class TestGame implements ILogic {
 
     Vector3f cameraInc;
 
-    private float lightAngle;
+    private float lightAngle, spotAngle= 0, spotInc = 1;
     private DirectionalLight directionalLight;
-    private PointLight pointLight;
-    private SpotLight spotLight;
+    private PointLight[] pointLights;
+    private SpotLight[] spotLights;
 
 
     public TestGame() {
@@ -53,20 +53,27 @@ public class TestGame implements ILogic {
 
         float lightIntensity = 1.0f;
         // point light
-        Vector3f lightPosition = new Vector3f(0, 0, -3.2f);
+        Vector3f lightPosition = new Vector3f(-0.5f, -0.5f, -3.2f);
         Vector3f lightColour = new Vector3f(1, 1, 1);
-        pointLight = new PointLight(lightColour, lightPosition, lightIntensity, 0, 0, 1);
+        PointLight pointLight = new PointLight(lightColour, lightPosition, lightIntensity, 0, 0, 1);
 
         // spot light
-        Vector3f coneDir = new Vector3f(0, 0, 1);
-        float cuttoff = (float) (Math.cos(Math.toRadians(180)));
-        spotLight = new SpotLight(new PointLight(lightColour, new Vector3f(0, 0, 1f), lightIntensity, 0, 0, 1), coneDir, cuttoff);
+        Vector3f coneDir = new Vector3f(0, 0, -1);
+        float cutoff = (float) (Math.cos(Math.toRadians(140)));
+        SpotLight spotLight = new SpotLight(new PointLight(lightColour, new Vector3f(0, 0, -3.6f), lightIntensity, 0, 0, 0.2f), coneDir, cutoff);
+
+        SpotLight spotLight1 = new SpotLight(pointLight, coneDir, cutoff);
+        spotLight1.getPointLight().setPosition(new Vector3f(0.5f, 0.5f, -3.6f));
 
         // directional light
         lightPosition = new Vector3f(-1, -10, 0);
         lightColour = new Vector3f(1, 1, 1);
         directionalLight = new DirectionalLight(lightColour, lightPosition, lightIntensity);
-    };
+
+        pointLights = new PointLight[]{pointLight};
+        spotLights = new SpotLight[]{spotLight, spotLight1};
+
+    }
 
     @Override
     public void input() {
@@ -89,18 +96,18 @@ public class TestGame implements ILogic {
         if (window.isKeyPressed(GLFW.GLFW_KEY_E)) {
             cameraInc.y = 1;
         }
-        if (window.isKeyPressed(GLFW.GLFW_KEY_O)) {
-            pointLight.getPosition().x += 0.1f;
-        }
-        if (window.isKeyPressed(GLFW.GLFW_KEY_P)) {
-            pointLight.getPosition().x -= 0.1f;
-        }
-        float lightPos = spotLight.getPointLight().getPosition().z;
+//        if (window.isKeyPressed(GLFW.GLFW_KEY_O)) {
+//            pointLight.getPosition().x += 0.1f;
+//        }
+//        if (window.isKeyPressed(GLFW.GLFW_KEY_P)) {
+//            pointLight.getPosition().x -= 0.1f;
+//        }
+        float lightPos = spotLights[0].getPointLight().getPosition().z;
         if (window.isKeyPressed(GLFW.GLFW_KEY_N)) {
-            spotLight.getPointLight().getPosition().z = lightPos +  0.1f;
+            spotLights[0].getPointLight().getPosition().z = lightPos +  0.1f;
         }
         if (window.isKeyPressed(GLFW.GLFW_KEY_M)) {
-            spotLight.getPointLight().getPosition().z = lightPos -  0.1f;
+            spotLights[0].getPointLight().getPosition().z = lightPos -  0.1f;
         }
     }
 
@@ -112,7 +119,19 @@ public class TestGame implements ILogic {
             Vector2f rotVec = mouseInput.getDisplVec();
             camera.moveRotation(rotVec.x * Consts.MOUSE_SENSITIVITY, rotVec.y * Consts.MOUSE_SENSITIVITY, 0);
         }
-//        entity.incRotation(0, 0.25f, 0);
+
+        spotAngle += spotInc * 0.05f;
+        if (spotAngle > 4) {
+            spotInc = -1;
+        } else if (spotAngle <= -4) {
+            spotInc = 1;
+        }
+
+        double spotAngleRed = Math.toRadians(spotAngle);
+        Vector3f coneDir = spotLights[0].getPointLight().getPosition();
+        coneDir.y = (float) Math.sin(spotAngleRed);
+        
+
         lightAngle += 0.5f;
         if (lightAngle > 90) {
             directionalLight.setIntensity(0);
@@ -136,7 +155,7 @@ public class TestGame implements ILogic {
 
     @Override
     public void render() {
-        renderer.render(entity, camera, directionalLight, pointLight, spotLight);
+        renderer.render(entity, camera, directionalLight, pointLights, spotLights);
 
     }
 

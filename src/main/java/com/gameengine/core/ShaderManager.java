@@ -26,6 +26,37 @@ public class ShaderManager {
         uniforms = new HashMap<>();
     }
 
+    public void setUniform(String uniformName, PointLight[] pointLights){
+        int numLights = pointLights != null ? pointLights.length : 0;
+        for (int i = 0; i < numLights; i++) {
+            setUniform(uniformName, pointLights[i], i);
+        }
+    }
+    public void setUniform(String uniformName, PointLight pointLight, int pos){
+        setUniform(uniformName + "[" + pos + "]", pointLight);
+    }
+
+    public void setUniform(String uniformName, SpotLight[] spotLights){
+        int numLights = spotLights != null ? spotLights.length : 0;
+        for (int i = 0; i < numLights; i++) {
+            setUniform(uniformName, spotLights[i], i);
+        }
+    }
+    public void setUniform(String uniformName, SpotLight spotLights, int pos){
+        setUniform(uniformName + "[" + pos + "]", spotLights);
+    }
+
+    public void createPointLightListUniform(String uniformName, int size) throws Exception{
+        for (int i = 0; i < size; i++){
+            createPointLightUniform(uniformName + "[" + i + "]");
+        }
+    }
+    public void createSpotLightListUniform(String uniformName, int size) throws Exception{
+        for (int i = 0; i < size; i++){
+            createSpotLightUniform(uniformName + "[" + i + "]");
+        }
+    }
+
     public void createUniform(String uniformName) throws Exception {
         int uniformLocation = GL20.glGetUniformLocation(programID, uniformName);
         if(uniformLocation < 0){
@@ -81,7 +112,6 @@ public class ShaderManager {
         createUniform(uniformName + ".hasTexture");
         createUniform(uniformName + ".reflectance");
     }
-
 
     public void setUniform(String uniformName, Matrix4f value){
         try(MemoryStack stack = MemoryStack.stackPush()) {
