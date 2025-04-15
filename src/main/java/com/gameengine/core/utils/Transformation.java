@@ -2,7 +2,7 @@ package com.gameengine.core.utils;
 
 import com.gameengine.core.Camera;
 import com.gameengine.core.entity.Entity;
-import com.gameengine.core.terrain.Terrain;
+import com.gameengine.core.entity.terrain.Terrain;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 

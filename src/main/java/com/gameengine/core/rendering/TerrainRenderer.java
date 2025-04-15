@@ -2,12 +2,11 @@ package com.gameengine.core.rendering;
 
 import com.gameengine.core.Camera;
 import com.gameengine.core.ShaderManager;
-import com.gameengine.core.entity.Entity;
 import com.gameengine.core.entity.Model;
 import com.gameengine.core.lighting.DirectionalLight;
 import com.gameengine.core.lighting.PointLight;
 import com.gameengine.core.lighting.SpotLight;
-import com.gameengine.core.terrain.Terrain;
+import com.gameengine.core.entity.terrain.Terrain;
 import com.gameengine.core.utils.Consts;
 import com.gameengine.core.utils.Transformation;
 import com.gameengine.core.utils.Utils;
@@ -18,9 +17,7 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class TerrainRenderer implements IRenderer {
 

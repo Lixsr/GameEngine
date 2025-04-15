@@ -4,10 +4,11 @@ import com.gameengine.core.Camera;
 import com.gameengine.core.ShaderManager;
 import com.gameengine.core.WindowManager;
 import com.gameengine.core.entity.Entity;
+import com.gameengine.core.entity.SceneManager;
 import com.gameengine.core.lighting.DirectionalLight;
 import com.gameengine.core.lighting.PointLight;
 import com.gameengine.core.lighting.SpotLight;
-import com.gameengine.core.terrain.Terrain;
+import com.gameengine.core.entity.terrain.Terrain;
 import com.gameengine.core.utils.Consts;
 import com.gameengine.test.Launcher;
 import org.lwjgl.opengl.GL11;
@@ -50,14 +51,14 @@ public class RenderManager {
 
     }
 
-    public void render(Camera camera, DirectionalLight directionalLight, PointLight[] pointLights, SpotLight[] spotLights) {
+    public void render(Camera camera, SceneManager scene) {
         clear();
         if(window.isResize()){
             GL11.glViewport(0,0, window.getWidth(), window.getHeight());
             window.setResize(false);
         }
-        entityRenderer.render(camera, pointLights, spotLights, directionalLight);
-        terrainRenderer.render(camera, pointLights, spotLights, directionalLight);
+        entityRenderer.render(camera, scene.getPointLights(), scene.getSpotLights(), scene.getDirectionalLight());
+        terrainRenderer.render(camera, scene.getPointLights(), scene.getSpotLights(), scene.getDirectionalLight());
     }
 
     public void processEntity(Entity entity){

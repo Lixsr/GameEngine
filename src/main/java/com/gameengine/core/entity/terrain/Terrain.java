@@ -1,4 +1,4 @@
-package com.gameengine.core.terrain;
+package com.gameengine.core.entity.terrain;
 
 import com.gameengine.core.ObjectLoader;
 import com.gameengine.core.entity.Material;
