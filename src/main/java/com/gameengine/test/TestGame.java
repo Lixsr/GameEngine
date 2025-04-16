@@ -38,6 +38,8 @@ public class TestGame implements ILogic {
         window = Launcher.getWindow();
         loader = new ObjectLoader();
         camera = new Camera();
+        camera.setPosition(0, 1, 0);
+
         cameraInc = new Vector3f();
         sceneManager = new SceneManager(-90);
 
@@ -46,7 +48,6 @@ public class TestGame implements ILogic {
     @Override
     public void init() throws Exception {
         renderer.init();
-
         // better cube rendering
         float[] vertices = new float[] {
                 -0.5f, 0.5f, 0.5f,
@@ -113,9 +114,9 @@ public class TestGame implements ILogic {
         BlendMapTerrain blendMapTerrain = new BlendMapTerrain(backgroundTexture, redTexture, greenTexture, blueTexture);
 
         // Add terrains
-        Terrain terrain = new Terrain(new Vector3f(0, 1, -800), loader, new Material(
+        Terrain terrain = new Terrain(new Vector3f(0, 0, -800), loader, new Material(
                 new Vector4f(0.0f, 0.0f, 0.0f, 0.0f), 0.1f), blendMapTerrain, blendMap);
-        Terrain terrain2 = new Terrain(new Vector3f(-800, 1, -800), loader, new Material(
+        Terrain terrain2 = new Terrain(new Vector3f(-800, 0, -800), loader, new Material(
                 new Vector4f(0.0f, 0.0f, 0.0f, 0.0f), 0.1f), blendMapTerrain, blendMap);
 
         sceneManager.addTerrain(terrain);
@@ -125,11 +126,11 @@ public class TestGame implements ILogic {
         for (int i = 0; i < 2000; i++) {
             float x = rnd.nextFloat() * 800;
             float z = rnd.nextFloat() * -800;
-            sceneManager.addEntity(new Entity(model, new Vector3f(x, 2, z),
+            sceneManager.addEntity(new Entity(model, new Vector3f(x, 0.5f, z),
                     new Vector3f(0, 0, 0), 1));
         }
 
-        sceneManager.addEntity(new Entity(model, new Vector3f(0, 2, -5),
+        sceneManager.addEntity(new Entity(model, new Vector3f(0, 0.5f, -5),
                 new Vector3f(0, 0, 0), 1));
 
         // Add entities
@@ -169,9 +170,6 @@ public class TestGame implements ILogic {
         SpotLight spotLight1 = new SpotLight(new PointLight(new Vector3f(0, 0.25f, 0f),
                 new Vector3f(1f, 50f, -5f), lightIntensity,
                 0f, 0f, 0.02f), coneDir, cutoff);
-
-//        SpotLight spotLight1 = new SpotLight(pointLight, coneDir, cutoff);
-//        spotLight1.getPointLight().setPosition(new Vector3f(0.5f, 0.5f, -3.6f));
 
         // directional light
         lightIntensity = 1f;
