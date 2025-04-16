@@ -38,7 +38,7 @@ public class TestGame implements ILogic {
         window = Launcher.getWindow();
         loader = new ObjectLoader();
         camera = new Camera();
-        camera.setPosition(0, 1, 0);
+        camera.setPosition(0, 2, 0);
 
         cameraInc = new Vector3f();
         sceneManager = new SceneManager(-90);
@@ -126,7 +126,7 @@ public class TestGame implements ILogic {
         for (int i = 0; i < 2000; i++) {
             float x = rnd.nextFloat() * 800;
             float z = rnd.nextFloat() * -800;
-            sceneManager.addEntity(new Entity(model, new Vector3f(x, 0.5f, z),
+            sceneManager.addEntity(new Entity(model, new Vector3f(x, 0.5f, (int)z),
                     new Vector3f(0, 0, 0), 1));
         }
 
