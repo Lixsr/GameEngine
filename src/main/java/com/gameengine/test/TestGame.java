@@ -2,6 +2,8 @@ package com.gameengine.test;
 
 import com.gameengine.core.*;
 import com.gameengine.core.entity.*;
+import com.gameengine.core.entity.terrain.BlendMapTerrain;
+import com.gameengine.core.entity.terrain.TerrainTexture;
 import com.gameengine.core.lighting.DirectionalLight;
 import com.gameengine.core.lighting.PointLight;
 import com.gameengine.core.lighting.SpotLight;
@@ -10,6 +12,7 @@ import com.gameengine.core.entity.terrain.Terrain;
 import com.gameengine.core.utils.Consts;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -101,17 +104,23 @@ public class TestGame implements ILogic {
 //        Model model = loader.loadOBJModel("/models/cube.obj");
         model.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")), 1f);
 
+        TerrainTexture backgroundTexture = new TerrainTexture(loader.loadTexture("textures/terrain.png"));
+        TerrainTexture redTexture = new TerrainTexture(loader.loadTexture("textures/flowers.png"));
+        TerrainTexture greenTexture = new TerrainTexture(loader.loadTexture("textures/stone.png"));
+        TerrainTexture blueTexture = new TerrainTexture(loader.loadTexture("textures/dirt.png"));
+        TerrainTexture blendMap = new TerrainTexture(loader.loadTexture("textures/blendMap.png"));
 
+        BlendMapTerrain blendMapTerrain = new BlendMapTerrain(backgroundTexture, redTexture, greenTexture, blueTexture);
 
-        // Terrains
-        Terrain terrain1 = new Terrain(new Vector3f(0, 1, -800), loader, new Material(
-                new Texture(loader.loadTexture("textures/terrain.png")),0.1f));
-        Terrain terrain2 = new Terrain(new Vector3f(-800, 1, -800), loader,new Material(
-                new Texture(loader.loadTexture("textures/flowers.png")),0.1f));
-        sceneManager.addTerrain(terrain1);
+        // Add terrains
+        Terrain terrain = new Terrain(new Vector3f(0, 1, -800), loader, new Material(
+                new Vector4f(0.0f, 0.0f, 0.0f, 0.0f), 0.1f), blendMapTerrain, blendMap);
+        Terrain terrain2 = new Terrain(new Vector3f(-800, 1, -800), loader, new Material(
+                new Vector4f(0.0f, 0.0f, 0.0f, 0.0f), 0.1f), blendMapTerrain, blendMap);
+
+        sceneManager.addTerrain(terrain);
         sceneManager.addTerrain(terrain2);
 
-        // Entities
         Random rnd = new Random();
         for (int i = 0; i < 2000; i++) {
             float x = rnd.nextFloat() * 800;
@@ -119,9 +128,11 @@ public class TestGame implements ILogic {
             sceneManager.addEntity(new Entity(model, new Vector3f(x, 2, z),
                     new Vector3f(0, 0, 0), 1));
         }
+
         sceneManager.addEntity(new Entity(model, new Vector3f(0, 2, -5),
                 new Vector3f(0, 0, 0), 1));
 
+        // Add entities
         // Terrain
         // Custom Terrain
 //        Model model2 = loader.loadOBJModel("/models/complex_terrain.obj");

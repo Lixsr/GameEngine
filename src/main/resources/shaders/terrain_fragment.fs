@@ -38,8 +38,12 @@ struct SpotLight {
     float cutoff;
 };
 
+uniform sampler2D backgroundTexture;
+uniform sampler2D redTexture;
+uniform sampler2D greenTexture;
+uniform sampler2D blueTexture;
+uniform sampler2D blendMap;
 
-uniform sampler2D textureSampler;
 uniform vec3 ambientLight;
 uniform Material material;
 uniform float specularPower;
@@ -50,20 +54,26 @@ uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
 vec4 ambientC;
 vec4 diffuseC;
 vec4 specularC;
+void setupColors(Material material, vec2 textCoord) {
+    if (material.hasTexture == 0) {
+        vec4 blendMapColour = texture(blendMap, textCoord);
+        float backgroundTextureAmt = 1 - (blendMapColour.r + blendMapColour.g + blendMapColour.b);
+        vec2 tiledCoords = textCoord / 2.5f;
+        vec4 backgroundTextureColour = texture(backgroundTexture, tiledCoords) * backgroundTextureAmt;
+        vec4 redTextureColour = texture(redTexture, tiledCoords) * blendMapColour.r;
+        vec4 greenTextureColour = texture(greenTexture, tiledCoords) * blendMapColour.g;
+        vec4 blueTextureColour = texture(blueTexture, tiledCoords) * blendMapColour.b;
 
-void setupColors(Material material, vec2 textCoords){
-    if(material.hasTexture == 1) {
-            ambientC = texture(textureSampler, fragTextureCoord);
-            diffuseC = ambientC;
-            specularC = ambientC;
-        } else {
-            ambientC = material.ambient;
-            diffuseC = material.diffuse;
-            specularC = material.specular;
-        }
-
-        fragColor = ambientC + vec4(ambientLight, 1);
+        ambientC = backgroundTextureColour + redTextureColour + greenTextureColour + blueTextureColour;
+        diffuseC = ambientC;
+        specularC = ambientC;
+    } else {
+        ambientC = material.ambient;
+        diffuseC = material.diffuse;
+        specularC = material.specular;
+    }
 }
+
 
 vec4 calcLightColour(vec3 light_color, float light_intensity, vec3 position, vec3 to_light_dir, vec3 normal){
     vec4 diffuseColor = vec4(0, 0, 0, 0);
