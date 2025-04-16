@@ -100,8 +100,8 @@ public class TestGame implements ILogic {
                 16, 18, 19, 17, 16, 19,
                 4, 6, 7, 5, 4, 7,
         };
-        Model model = loader.loadModel(vertices, textureCoords, indices);
-//        Model model = loader.loadOBJModel("/models/cube.obj");
+//        Model model = loader.loadModel(vertices, textureCoords, indices);
+        Model model = loader.loadOBJModel("/models/cube.obj");
         model.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")), 1f);
 
         TerrainTexture backgroundTexture = new TerrainTexture(loader.loadTexture("textures/terrain.png"));

@@ -36,7 +36,6 @@ public class ObjectLoader {
 
         for (String line : lines) {
             String[] tokens = line.split("\\s+");
-
             switch (tokens[0]) {
                 case "v":
                     //vertices
@@ -66,9 +65,6 @@ public class ObjectLoader {
                     break;
                 case "f":
                     //faces
-//                    processFace(tokens[1], faces);
-//                    processFace(tokens[2], faces);
-//                    processFace(tokens[3], faces);
                     for(int i=1; i< tokens.length; i++){
                         processFace(tokens[i],faces);
                     }
@@ -76,7 +72,6 @@ public class ObjectLoader {
                 default:
                     break;
             }
-
         }
         List<Integer> indices = new ArrayList<>();
         float[] verticesArr = new float[vertices.size() * 3];
@@ -109,7 +104,7 @@ public class ObjectLoader {
         if (texCoord >= 0) {
             Vector2f texCoordVec = texCoordList.get(texCoord);
             texCoordArr[pos * 2] = texCoordVec.x;
-            texCoordArr[pos * 2 + 1] = 1 - texCoordVec.y;
+            texCoordArr[pos * 2 + 1] = texCoordVec.y;
         }
 
         if (normal >= 0) {
@@ -136,7 +131,6 @@ public class ObjectLoader {
         Vector3i facesVec = new Vector3i(pos, coords, normal);
         faces.add(facesVec);
     }
-
 
     public Model loadModel(float[] vertices, float[] textureCoords, float[] normals, int[] indices) {
         int id = createVAO();
