@@ -106,9 +106,9 @@ public class TestGame implements ILogic {
         model.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")), 1f);
 
         TerrainTexture backgroundTexture = new TerrainTexture(loader.loadTexture("textures/terrain.png"));
-        TerrainTexture redTexture = new TerrainTexture(loader.loadTexture("textures/flowers.png"));
+        TerrainTexture redTexture = new TerrainTexture(loader.loadTexture("textures/stone.png"));
         TerrainTexture greenTexture = new TerrainTexture(loader.loadTexture("textures/stone.png"));
-        TerrainTexture blueTexture = new TerrainTexture(loader.loadTexture("textures/dirt.png"));
+        TerrainTexture blueTexture = new TerrainTexture(loader.loadTexture("textures/stone.png"));
         TerrainTexture blendMap = new TerrainTexture(loader.loadTexture("textures/blendMap.png"));
 
         BlendMapTerrain blendMapTerrain = new BlendMapTerrain(backgroundTexture, redTexture, greenTexture, blueTexture);
@@ -124,9 +124,9 @@ public class TestGame implements ILogic {
 
         Random rnd = new Random();
         for (int i = 0; i < 2000; i++) {
-            float x = rnd.nextFloat() * 800;
-            float z = rnd.nextFloat() * -800;
-            sceneManager.addEntity(new Entity(model, new Vector3f(x, 0.5f, (int)z),
+            int x = (int) Math.floor(rnd.nextFloat() * 800);
+            int z = (int) Math.floor(rnd.nextFloat() * -800);
+            sceneManager.addEntity(new Entity(model, new Vector3f(x, 0.5f, z),
                     new Vector3f(0, 0, 0), 1));
         }
 
