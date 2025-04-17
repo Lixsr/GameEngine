@@ -75,6 +75,9 @@ public class TerrainRenderer implements IRenderer {
         GL20.glEnableVertexAttribArray(1);
         GL20.glEnableVertexAttribArray(2);
 
+        // terrain is not rendered when the player is below it
+        RenderManager.enableCulling();
+
         shader.setUniform("backgroundTexture", 0);
         shader.setUniform("redTexture", 1);
         shader.setUniform("greenTexture", 2);
