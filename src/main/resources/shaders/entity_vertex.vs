@@ -16,8 +16,7 @@ void main() {
     vec4 worldPos = transformationMatrix * vec4(position, 1.0);
     gl_Position = projectionMatrix * viewMatrix * worldPos;
 
-    fragNormal = normalize(worldPos).xyz;
+    fragNormal = normalize(projectionMatrix * vec4(normal, 0.0)).xyz;
     fragPos = worldPos.xyz;
     fragTextureCoord = textureCoord;
-
 }

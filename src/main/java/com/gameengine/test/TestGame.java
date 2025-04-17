@@ -15,6 +15,7 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,9 +38,7 @@ public class TestGame implements ILogic {
         renderer = new RenderManager();
         window = Launcher.getWindow();
         loader = new ObjectLoader();
-        camera = new Camera();
-        camera.setPosition(0, 2, 0);
-
+        camera = new Camera(new Vector3f(0, 2, 0), new Vector3f(0, 0, 0));
         cameraInc = new Vector3f();
         sceneManager = new SceneManager(-90);
 
@@ -49,59 +48,6 @@ public class TestGame implements ILogic {
     public void init() throws Exception {
         renderer.init();
         // better cube rendering
-        float[] vertices = new float[] {
-                -0.5f, 0.5f, 0.5f,
-                -0.5f, -0.5f, 0.5f,
-                0.5f, -0.5f, 0.5f,
-                0.5f, 0.5f, 0.5f,
-                -0.5f, 0.5f, -0.5f,
-                0.5f, 0.5f, -0.5f,
-                -0.5f, -0.5f, -0.5f,
-                0.5f, -0.5f, -0.5f,
-                -0.5f, 0.5f, -0.5f,
-                0.5f, 0.5f, -0.5f,
-                -0.5f, 0.5f, 0.5f,
-                0.5f, 0.5f, 0.5f,
-                0.5f, 0.5f, 0.5f,
-                0.5f, -0.5f, 0.5f,
-                -0.5f, 0.5f, 0.5f,
-                -0.5f, -0.5f, 0.5f,
-                -0.5f, -0.5f, -0.5f,
-                0.5f, -0.5f, -0.5f,
-                -0.5f, -0.5f, 0.5f,
-                0.5f, -0.5f, 0.5f,
-        };
-        float[] textureCoords = new float[]{
-                0.0f, 0.0f,
-                0.0f, 0.5f,
-                0.5f, 0.5f,
-                0.5f, 0.0f,
-                0.0f, 0.0f,
-                0.5f, 0.0f,
-                0.0f, 0.5f,
-                0.5f, 0.5f,
-                0.0f, 0.5f,
-                0.5f, 0.5f,
-                0.0f, 1.0f,
-                0.5f, 1.0f,
-                0.0f, 0.0f,
-                0.0f, 0.5f,
-                0.5f, 0.0f,
-                0.5f, 0.5f,
-                0.5f, 0.0f,
-                1.0f, 0.0f,
-                0.5f, 0.5f,
-                1.0f, 0.5f,
-        };
-        int[] indices = new int[]{
-                0, 1, 3, 3, 1, 2,
-                8, 10, 11, 9, 8, 11,
-                12, 13, 7, 5, 12, 7,
-                14, 15, 6, 4, 14, 6,
-                16, 18, 19, 17, 16, 19,
-                4, 6, 7, 5, 4, 7,
-        };
-//        Model model = loader.loadModel(vertices, textureCoords, indices);
         Model model = loader.loadOBJModel("/models/cube.obj");
         model.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")), 1f);
 
@@ -124,6 +70,7 @@ public class TestGame implements ILogic {
         sceneManager.addTerrain(terrain);
         sceneManager.addTerrain(terrain2);
 
+        // Add entities
         Random rnd = new Random();
         for (int i = 0; i < 2000; i++) {
             int x = (int) Math.floor(rnd.nextFloat() * 800);
@@ -135,7 +82,6 @@ public class TestGame implements ILogic {
         sceneManager.addEntity(new Entity(model, new Vector3f(0, 0.5f, -5),
                 new Vector3f(0, 0, 0), 1));
 
-        // Add entities
         // Terrain
         // Custom Terrain
 //        Model model2 = loader.loadOBJModel("/models/complex_terrain.obj");
@@ -155,23 +101,23 @@ public class TestGame implements ILogic {
         // point light
         Vector3f lightPosition = new Vector3f(-0.5f, -0.5f, -3.2f);
         Vector3f lightColour = new Vector3f(1, 1, 1);
-        PointLight pointLight = new PointLight(lightColour, lightPosition, lightIntensity, 0, 0, 1);
+        PointLight pointLight = new PointLight(lightColour, lightPosition, lightIntensity);
+        PointLight.Attenuation attenuation = new PointLight.Attenuation(0, 0, 1);
+        pointLight.setAttenuation(attenuation);
 
         // spot light
         Vector3f coneDir = new Vector3f(0, -50, 0);
         float cutoff = (float) (Math.cos(Math.toRadians(0.4)));
         lightIntensity = 50000f;
         SpotLight spotLight = new SpotLight(new PointLight(new Vector3f(0.25f, 0, 0f),
-                new Vector3f(1f, 50f, -5f), lightIntensity,
-                0f, 0f, 0.02f), coneDir, cutoff);
+                new Vector3f(1f, 50f, -5f), lightIntensity, new PointLight.Attenuation(0f, 0f, 0.02f)), coneDir, cutoff);
 
         // spot light
         coneDir = new Vector3f(0, -50, 0);
         cutoff = (float) (Math.cos(Math.toRadians(0.4)));
         lightIntensity = 50000f;
         SpotLight spotLight1 = new SpotLight(new PointLight(new Vector3f(0, 0.25f, 0f),
-                new Vector3f(1f, 50f, -5f), lightIntensity,
-                0f, 0f, 0.02f), coneDir, cutoff);
+                new Vector3f(1f, 50f, -5f), lightIntensity,new PointLight.Attenuation(0f, 0f, 0.02f)), coneDir, cutoff);
 
         // directional light
         lightIntensity = 1f;
