@@ -1,5 +1,4 @@
 package com.gameengine.test;
-
 import com.gameengine.core.*;
 import com.gameengine.core.entity.*;
 import com.gameengine.core.entity.terrain.BlendMapTerrain;
@@ -14,11 +13,6 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
-
 import java.util.Random;
 
 
@@ -27,12 +21,8 @@ public class TestGame implements ILogic {
     private final WindowManager window;
     private final ObjectLoader loader;
     private SceneManager sceneManager;
-
-
     private Camera camera;
-
     Vector3f cameraInc;
-
 
     public TestGame() {
         renderer = new RenderManager();
@@ -41,9 +31,7 @@ public class TestGame implements ILogic {
         camera = new Camera(new Vector3f(0, 2, 0), new Vector3f(0, 0, 0));
         cameraInc = new Vector3f();
         sceneManager = new SceneManager(-90);
-
     }
-
     @Override
     public void init() throws Exception {
         renderer.init();
@@ -78,24 +66,8 @@ public class TestGame implements ILogic {
             sceneManager.addEntity(new Entity(model, new Vector3f(x, 0.5f, z),
                     new Vector3f(0, 0, 0), 1));
         }
-
         sceneManager.addEntity(new Entity(model, new Vector3f(0, 0.5f, -5),
                 new Vector3f(0, 0, 0), 1));
-
-        // Terrain
-        // Custom Terrain
-//        Model model2 = loader.loadOBJModel("/models/complex_terrain.obj");
-//        model2.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")), 1f);
-//        rnd = new Random();
-//        for (int i = 0; i < 1; i++) {
-//            float x = rnd.nextFloat() * 100 - 50;
-//            float y = rnd.nextFloat() * 100 - 50;
-//            float z = rnd.nextFloat() * -300;
-//            entities.add(new Entity(model2, new Vector3f(0, -1, -800),
-//                    new Vector3f(rnd.nextFloat() * 180, rnd.nextFloat() * 180, 0), 1));
-//        }
-//        entities.add(new Entity(model2, new Vector3f(0, 0, -2f),
-//                new Vector3f(0, 0, 0), 1));
 
         float lightIntensity = 1.0f;
         // point light
@@ -131,7 +103,7 @@ public class TestGame implements ILogic {
     }
 
     @Override
-    public void input() {
+    public void input() throws Exception {
         cameraInc.set(0, 0, 0);
         if (window.isKeyPressed(GLFW.GLFW_KEY_W)) {
             cameraInc.z = -1;
@@ -151,51 +123,115 @@ public class TestGame implements ILogic {
         if (window.isKeyPressed(GLFW.GLFW_KEY_E)) {
             cameraInc.y = 1;
         }
-//        if (window.isKeyPressed(GLFW.GLFW_KEY_O)) {
-//            pointLight.getPosition().x += 0.1f;
-//        }
-//        if (window.isKeyPressed(GLFW.GLFW_KEY_P)) {
-//            pointLight.getPosition().x -= 0.1f;
-//        }
-//        float lightPos = sceneManager.getSpotLights()[0].getPointLight().getPosition().z;
-//        if (window.isKeyPressed(GLFW.GLFW_KEY_N)) {
-//            sceneManager.getSpotLights()[0].getPointLight().getPosition().z = lightPos +  0.1f;
-//        }
-//        if (window.isKeyPressed(GLFW.GLFW_KEY_M)) {
-//            sceneManager.getSpotLights()[0].getPointLight().getPosition().z = lightPos -  0.1f;
-//        }
     }
+    private void createBlockOnSide() throws Exception {
+        Vector3f camPosition = camera.getPosition();
+        Vector3f camRotation = camera.getRotation();
 
-    @Override
-    public void update(float interval, MouseInput mouseInput) {
-        camera.movePosition(cameraInc.x * Consts.CAMERA_MOVE_SPEED, cameraInc.y * Consts.CAMERA_MOVE_SPEED, cameraInc.z * Consts.CAMERA_MOVE_SPEED);
+        // Direction based on camera rotation
+        Vector3f camDirection = new Vector3f(
+                (float) -Math.sin(Math.toRadians(camRotation.y)),
+                (float) Math.sin(Math.toRadians(camRotation.x)),
+                (float) -Math.cos(Math.toRadians(camRotation.y))
+        );
 
-        if(mouseInput.isRightButtonPress()) {
-            Vector2f rotVec = mouseInput.getDisplVec();
-            camera.moveRotation(rotVec.x * Consts.MOUSE_SENSITIVITY, rotVec.y * Consts.MOUSE_SENSITIVITY, 0);
+        // Ray cast distance and step
+        float rayLength = 5.0f;
+        float stepSize = 0.1f;
+        Vector3f checkPosition = new Vector3f(camPosition);
+
+        Entity hitEntity = null;
+
+        for (float i = 0; i < rayLength; i += stepSize) {
+            checkPosition.add(new Vector3f(camDirection).mul(stepSize));
+            float detectionRadius = 0.5f; // Adjust based on block size
+
+            for (Entity entity : sceneManager.getEntities()) {
+                Vector3f entityPos = entity.getPos();
+                if (entityPos.distance(entityPos) <= detectionRadius) {
+                    hitEntity = entity;
+                }
+            }
+            if (hitEntity != null) break;
         }
 
+        if (hitEntity != null) {
+            Vector3f hitPos = new Vector3f(hitEntity.getPos());
+            Vector3f newBlockPos = new Vector3f(hitPos).add(camDirection.normalize());
+
+            Model blockModel = loader.loadOBJModel("/models/cube.obj");
+            blockModel.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")), 1f);
+            blockModel.getMaterial().setDisableCulling(true);
+
+            Entity newBlock = new Entity(blockModel, newBlockPos, new Vector3f(0, 0, 0), 1);
+            sceneManager.addEntity(newBlock);
+        }
+    }
+    public Vector3f raycastBlockHitPosition(Vector3f origin, Vector3f direction, float rayLength, float stepSize) {
+        Vector3f currentPos = new Vector3f(origin);
+        Vector3f step = new Vector3f(direction).normalize().mul(stepSize);
+        for (float i = 0; i < rayLength; i += stepSize) {
+            currentPos.add(step);
+            Entity entity = getEntityAtPosition(currentPos);
+            if (entity != null) {
+                System.out.println(entity.getPos());
+                return new Vector3f(entity.getPos());
+            }
+        }
+
+        return null; // No hit
+    }
+    public Entity getEntityAtPosition(Vector3f position) {
+        float detectionRadius = 3f;
+
+        for (Entity entity : sceneManager.getEntities()) {
+            Vector3f entityPos = entity.getPos();
+
+            // If your entities are snapped to a grid, you can round the float
+            if (Math.abs(entityPos.x - position.x) <= detectionRadius &&
+                    Math.abs(entityPos.y - position.y) <= detectionRadius &&
+                    Math.abs(entityPos.z - position.z) <= detectionRadius) {
+                return entity;
+            }
+        }
+        return null;
+    }
 
 
+    private boolean wasLeftButtonPressed = false;
+    @Override
+    public void update(float interval, MouseInput mouseInput) throws Exception {
+        camera.movePosition(cameraInc.x * Consts.CAMERA_MOVE_SPEED, cameraInc.y * Consts.CAMERA_MOVE_SPEED, cameraInc.z * Consts.CAMERA_MOVE_SPEED);
 
+        Vector2f rotVec = mouseInput.getDisplVec();
+        camera.moveRotation(rotVec.x * Consts.MOUSE_SENSITIVITY, rotVec.y * Consts.MOUSE_SENSITIVITY, 0);
+
+        // Mouse click handling
+        boolean isLeftButtonPressed = mouseInput.isLeftButtonPress();
+        if (isLeftButtonPressed && !wasLeftButtonPressed) { // Detect transition to pressed
+            Vector3f origin = camera.getPosition();
+            Vector3f rotation = camera.getRotation();
+            Vector3f direction = new Vector3f(
+                    (float) -Math.sin(Math.toRadians(rotation.y)),
+                    (float) Math.sin(Math.toRadians(rotation.x)),
+                    (float) -Math.cos(Math.toRadians(rotation.y))
+            );
+            System.out.println("Block touched at " + raycastBlockHitPosition(origin, direction, 5.0f, 0.1f));
+        }
+        wasLeftButtonPressed = isLeftButtonPressed; // Update state for next frame
         sceneManager.incSpotAngle(0.75f);
         if (sceneManager.getSpotAngle() > 9600) {
             sceneManager.setSpotInc(-1);
         } else if (sceneManager.getSpotAngle() <= -9600) {
             sceneManager.setSpotInc(1);
-//            sceneManager.setSpotInc(1);
         }
 
         // Move the spot light over time
         double spotAngleRed = Math.toRadians(sceneManager.getSpotAngle());
-//        Vector3f coneDir = sceneManager.getSpotLights()[0].getConeDirection();
-
         Vector3f coneDir = sceneManager.getSpotLights()[0].getPointLight().getPosition();
         coneDir.x = (float) Math.sin(spotAngleRed)/2;
-
         coneDir = sceneManager.getSpotLights()[1].getPointLight().getPosition();
         coneDir.x = (float) Math.cos(spotAngleRed)/2;
-
 
         sceneManager.incLightAngle(1.1f);
         if (sceneManager.getLightAngle() > 90) {

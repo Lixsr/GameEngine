@@ -36,7 +36,7 @@ public class EngineManager {
         }
         run();
     }
-    public void run(){
+    public void run() throws Exception {
         this.isRunning = true;
         int frames = 0;
         long frameCounter = 0;
@@ -85,7 +85,7 @@ public class EngineManager {
         isRunning = false;
     }
 
-    private void input(){
+    private void input() throws Exception {
 
         mouseInput.input();
         gameLogic.input();
@@ -96,7 +96,7 @@ public class EngineManager {
         window.update();
     }
 
-    private void update(float interval){
+    private void update(float interval) throws Exception {
         gameLogic.update(interval, mouseInput);
     }
 
