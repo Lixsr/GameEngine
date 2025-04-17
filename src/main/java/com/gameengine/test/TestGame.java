@@ -106,9 +106,9 @@ public class TestGame implements ILogic {
         model.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")), 1f);
 
         TerrainTexture backgroundTexture = new TerrainTexture(loader.loadTexture("textures/terrain.png"));
-        TerrainTexture redTexture = new TerrainTexture(loader.loadTexture("textures/stone.png"));
+        TerrainTexture redTexture = new TerrainTexture(loader.loadTexture("textures/flowers.png"));
         TerrainTexture greenTexture = new TerrainTexture(loader.loadTexture("textures/stone.png"));
-        TerrainTexture blueTexture = new TerrainTexture(loader.loadTexture("textures/stone.png"));
+        TerrainTexture blueTexture = new TerrainTexture(loader.loadTexture("textures/dirt.png"));
         TerrainTexture blendMap = new TerrainTexture(loader.loadTexture("textures/blendMap.png"));
 
         BlendMapTerrain blendMapTerrain = new BlendMapTerrain(backgroundTexture, redTexture, greenTexture, blueTexture);

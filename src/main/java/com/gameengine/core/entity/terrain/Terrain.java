@@ -4,11 +4,12 @@ import com.gameengine.core.ObjectLoader;
 import com.gameengine.core.entity.Material;
 import com.gameengine.core.entity.Model;
 import com.gameengine.core.entity.Texture;
+import com.gameengine.core.utils.Consts;
 import org.joml.Vector3f;
 
 public class Terrain {
 
-    private static final float SIZE = 800;
+    private static final float SIZE = Consts.SIZE;
     private static final int VERTEX_COUNT = 128;
 
     private Vector3f position;

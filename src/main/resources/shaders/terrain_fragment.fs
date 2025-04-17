@@ -47,6 +47,7 @@ uniform sampler2D blendMap;
 uniform vec3 ambientLight;
 uniform Material material;
 uniform float specularPower;
+uniform float SIZE;
 uniform DirectionalLight directionalLight;
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
 uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
@@ -58,7 +59,7 @@ void setupColors(Material material, vec2 textCoord) {
     if (material.hasTexture == 0) {
         vec4 blendMapColour = texture(blendMap, textCoord);
         float backgroundTextureAmt = 1 - (blendMapColour.r + blendMapColour.g + blendMapColour.b);
-        vec2 tiledCoords = textCoord * 800.0f;
+        vec2 tiledCoords = textCoord * SIZE;
         vec4 backgroundTextureColour = texture(backgroundTexture, tiledCoords) * backgroundTextureAmt;
         vec4 redTextureColour = texture(redTexture, tiledCoords) * blendMapColour.r;
         vec4 greenTextureColour = texture(greenTexture, tiledCoords) * blendMapColour.g;

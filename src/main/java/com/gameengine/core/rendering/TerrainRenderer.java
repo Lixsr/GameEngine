@@ -41,6 +41,7 @@ public class TerrainRenderer implements IRenderer {
         shader.createUniform("greenTexture");
         shader.createUniform("blueTexture");
         shader.createUniform("blendMap");
+        shader.createUniform("SIZE");
         shader.createUniform("transformationMatrix");
         shader.createUniform("projectionMatrix");
         shader.createUniform("viewMatrix");
@@ -81,6 +82,7 @@ public class TerrainRenderer implements IRenderer {
         shader.setUniform("blendMap", 4);
 
         shader.setUniform("material", model.getMaterial());
+        shader.setUniform("SIZE", Consts.SIZE);
 
     }
 
