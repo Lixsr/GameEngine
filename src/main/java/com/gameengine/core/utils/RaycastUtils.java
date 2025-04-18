@@ -10,6 +10,7 @@ public class RaycastUtils {
         Entity closestEntity = null;
         float closestTMin = Float.POSITIVE_INFINITY;
         String closestFace = null;
+        Vector3f offset = new Vector3f(0, 0, 0);
 
         for (Entity entity : entities) {
             Vector3f entityPos = entity.getPos();
@@ -22,14 +23,6 @@ public class RaycastUtils {
                 continue;
             }
             // Define the six faces of the AABB
-            Vector3f[] faceNormals = {
-                    new Vector3f(1, 0, 0),  // Right (+x)
-                    new Vector3f(-1, 0, 0), // Left (-x)
-                    new Vector3f(0, 1, 0),  // Top (+y)
-                    new Vector3f(0, -1, 0), // Bottom (-y)
-                    new Vector3f(0, 0, 1),  // Front (+z)
-                    new Vector3f(0, 0, -1)  // Back (-z)
-            };
             Vector3f[] facePoints = {
                     new Vector3f(max.x, entityPos.y, entityPos.z), // Right
                     new Vector3f(min.x, entityPos.y, entityPos.z), // Left
@@ -38,12 +31,11 @@ public class RaycastUtils {
                     new Vector3f(entityPos.x, entityPos.y, max.z), // Front
                     new Vector3f(entityPos.x, entityPos.y, min.z)  // Back
             };
-            String[] faceNames = {"right", "left", "top", "bottom", "front", "back"};
             // Check each face
             for (int i = 0; i < 6; i++) {
-                Vector3f normal = faceNormals[i];
+                Vector3f normal = Consts.faceNormals[i];
                 Vector3f pointOnPlane = facePoints[i];
-                String faceName = faceNames[i];
+                String faceName = Consts.faceNames[i];
 
                 float t = rayPlaneIntersection(origin, rayDirection, normal, pointOnPlane);
                 if (t >= 0 && t <= rayLength && t < closestTMin) {
@@ -52,14 +44,17 @@ public class RaycastUtils {
                         closestTMin = t;
                         closestEntity = entity;
                         closestFace = faceName;
+                        offset.add(normal);
                     }
                 }
             }
         }
 
         if (closestEntity != null) {
-            System.out.println("Hit entity at: " + closestEntity.getPos() + ", face: " + closestFace);
-            return new Vector3f(closestEntity.getPos());
+            Vector3f pos = new Vector3f(closestEntity.getPos()).add(offset);
+            // Debugging
+            System.out.println("Hit entity at: " + pos + ", face: " + closestFace);
+            return pos;
         }
 
         return null;

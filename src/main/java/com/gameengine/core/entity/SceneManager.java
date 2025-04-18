@@ -32,12 +32,24 @@ public class SceneManager {
     public List<Entity> getEntities() {
         return entities;
     }
+    public Entity getEntity(Vector3f pos) {
+        for (Entity entity : entities) {
+            if (entity.getPos().equals(pos)) {
+                return entity;
+            }
+        }
+        return null;
+    }
 
     public void setEntities(List<Entity> entities) {
         this.entities = entities;
     }
     public void addEntity(Entity entity) {
         this.entities.add(entity);
+    }
+    public void removeEntity(Vector3f pos) {
+        Entity entity = getEntity(pos);
+        this.entities.remove(entity);
     }
 
     public List<Terrain> getTerrains() {
@@ -105,6 +117,12 @@ public class SceneManager {
     }
     public void incSpotAngle(float inc) {
         this.spotAngle += inc;
+    }
+    public boolean hasEntityAt(Vector3f pos){
+        for (Entity entity : entities) {
+            if (entity.getPos().equals(pos)) return true;
+        }
+        return false;
     }
 
     public float getSpotInc() {

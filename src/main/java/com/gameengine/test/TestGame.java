@@ -14,8 +14,11 @@ import com.gameengine.core.utils.Utils;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL11;
+
 import java.util.Random;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 
 public class TestGame implements ILogic {
@@ -37,6 +40,13 @@ public class TestGame implements ILogic {
     @Override
     public void init() throws Exception {
         renderer.init();
+        glfwSetInputMode(window.getWindowHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+//        long crosshairCursor = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
+//        glfwSetCursor(window.getWindowHandle(), crosshairCursor);
+
+
+
         // better cube rendering
         Model model = loader.loadOBJModel("/models/cube.obj");
         model.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")), 1f);
@@ -79,17 +89,16 @@ public class TestGame implements ILogic {
         PointLight.Attenuation attenuation = new PointLight.Attenuation(0, 0, 1);
         pointLight.setAttenuation(attenuation);
 
+        lightIntensity = 50000f;
         // spot light
         Vector3f coneDir = new Vector3f(0, -50, 0);
         float cutoff = (float) (Math.cos(Math.toRadians(0.4)));
-        lightIntensity = 50000f;
         SpotLight spotLight = new SpotLight(new PointLight(new Vector3f(0.25f, 0, 0f),
                 new Vector3f(1f, 50f, -5f), lightIntensity, new PointLight.Attenuation(0f, 0f, 0.02f)), coneDir, cutoff);
 
         // spot light
         coneDir = new Vector3f(0, -50, 0);
         cutoff = (float) (Math.cos(Math.toRadians(0.4)));
-        lightIntensity = 50000f;
         SpotLight spotLight1 = new SpotLight(new PointLight(new Vector3f(0, 0.25f, 0f),
                 new Vector3f(1f, 50f, -5f), lightIntensity,new PointLight.Attenuation(0f, 0f, 0.02f)), coneDir, cutoff);
 
@@ -107,25 +116,26 @@ public class TestGame implements ILogic {
     @Override
     public void input() throws Exception {
         cameraInc.set(0, 0, 0);
-        if (window.isKeyPressed(GLFW.GLFW_KEY_W)) {
+        if (window.isKeyPressed(GLFW_KEY_W)) {
             cameraInc.z = -1;
         }
-        if (window.isKeyPressed(GLFW.GLFW_KEY_S)) {
+        if (window.isKeyPressed(GLFW_KEY_S)) {
             cameraInc.z = 1;
         }
-        if (window.isKeyPressed(GLFW.GLFW_KEY_A)) {
+        if (window.isKeyPressed(GLFW_KEY_A)) {
             cameraInc.x = -1;
         }
-        if (window.isKeyPressed(GLFW.GLFW_KEY_D)) {
+        if (window.isKeyPressed(GLFW_KEY_D)) {
             cameraInc.x = 1;
         }
-        if (window.isKeyPressed(GLFW.GLFW_KEY_Q)) {
+        if (window.isKeyPressed(GLFW_KEY_Q)) {
             cameraInc.y = -1;
         }
-        if (window.isKeyPressed(GLFW.GLFW_KEY_E)) {
+        if (window.isKeyPressed(GLFW_KEY_E)) {
             cameraInc.y = 1;
         }
     }
+
     private boolean wasLeftButtonPressed = false;
     @Override
     public void update(float interval, MouseInput mouseInput) throws Exception {
@@ -147,16 +157,23 @@ public class TestGame implements ILogic {
         if (isLeftButtonPressed && !wasLeftButtonPressed) {
             Vector3f origin = camera.getPosition();
             Vector3f rotation = camera.getRotation();
-
             double yaw = Math.toRadians(rotation.y);
             double pitch = Math.toRadians(rotation.x);
-
             Vector3f direction = new Vector3f(
                     (float) (Math.cos(pitch) * Math.sin(yaw)),
                     (float) -Math.sin(pitch),
                     (float) -(Math.cos(pitch) * Math.cos(yaw))
             ).normalize();
-            System.out.println("Block touched at " + RaycastUtils.raycastBlockHitPosition(origin, direction, 5.0f, 0.1f, sceneManager.getEntities()));
+
+            Vector3f pos = RaycastUtils.raycastBlockHitPosition(origin, direction, 5.0f, 0.1f, sceneManager.getEntities());
+            if (pos != null) {
+                Model model = loader.loadOBJModel("/models/cube.obj");
+                model.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")), 1f);
+                model.getMaterial().setDisableCulling(true);
+                System.out.println("building");
+                sceneManager.addEntity(new Entity(model, pos,
+                        new Vector3f(0, 0, 0), 1));
+            }
         }
         wasLeftButtonPressed = isLeftButtonPressed; // Update state for next frame
         sceneManager.incSpotAngle(0.75f);

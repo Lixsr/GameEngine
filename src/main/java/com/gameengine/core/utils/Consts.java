@@ -21,4 +21,13 @@ public class Consts {
 
     public static final float MOUSE_SENSITIVITY = 0.2f;
     public static final float CAMERA_MOVE_SPEED = 0.05f;
+    public static final Vector3f[] faceNormals = {
+            new Vector3f(1, 0, 0),  // Right (+x)
+            new Vector3f(-1, 0, 0), // Left (-x)
+            new Vector3f(0, 1, 0),  // Top (+y)
+            new Vector3f(0, -1, 0), // Bottom (-y)
+            new Vector3f(0, 0, 1),  // Front (+z)
+            new Vector3f(0, 0, -1)  // Back (-z)
+    };
+    public static final String[] faceNames = {"right", "left", "top", "bottom", "front", "back"};
 }

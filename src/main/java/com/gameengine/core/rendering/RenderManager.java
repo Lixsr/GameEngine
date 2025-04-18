@@ -22,6 +22,7 @@ public class RenderManager {
     private final WindowManager window;
     private EntityRenderer entityRenderer;
     private TerrainRenderer terrainRenderer;
+    private CrosshairRenderer crosshairRenderer;
     private static boolean isCulling = false;
 
     public RenderManager(){
@@ -32,8 +33,13 @@ public class RenderManager {
     public void init() throws Exception {
         entityRenderer = new EntityRenderer();
         terrainRenderer = new TerrainRenderer();
+        crosshairRenderer = new CrosshairRenderer();
         entityRenderer.init();
         terrainRenderer.init();
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        crosshairRenderer.init();
+
     }
 
 
@@ -60,6 +66,7 @@ public class RenderManager {
         }
         entityRenderer.render(camera, scene.getPointLights(), scene.getSpotLights(), scene.getDirectionalLight());
         terrainRenderer.render(camera, scene.getPointLights(), scene.getSpotLights(), scene.getDirectionalLight());
+        crosshairRenderer.render(camera, scene.getPointLights(), scene.getSpotLights(), scene.getDirectionalLight());
     }
 
     public static void enableCulling(){
@@ -95,5 +102,6 @@ public class RenderManager {
     public void cleanup() {
         entityRenderer.cleanup();
         terrainRenderer.cleanup();
+        crosshairRenderer.cleanup();
     }
 }

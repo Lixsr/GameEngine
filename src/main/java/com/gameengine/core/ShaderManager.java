@@ -5,6 +5,7 @@ import com.gameengine.core.lighting.DirectionalLight;
 import com.gameengine.core.lighting.PointLight;
 import com.gameengine.core.lighting.SpotLight;
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL20;
@@ -79,6 +80,13 @@ public class ShaderManager {
         setUniform(uniformName + ".pl", SpotLight.getPointLight());
         setUniform(uniformName + ".conedir", SpotLight.getConeDirection());
         setUniform(uniformName + ".cutoff", SpotLight.getCutoff());
+    }
+
+    public void setUniform(String uniformName, Vector2f value) {
+        GL20.glUniform2f(uniforms.get(uniformName), value.x, value.y);
+    }
+    public void createUIUniforms() throws Exception {
+        createUniform(".iResolution");
     }
 
     public void createPointLightUniform(String uniformName) throws Exception {
