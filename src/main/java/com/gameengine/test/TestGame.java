@@ -1,5 +1,6 @@
 package com.gameengine.test;
 import com.gameengine.core.*;
+import com.gameengine.core.builder.BlockBuilder;
 import com.gameengine.core.entity.*;
 import com.gameengine.core.entity.terrain.BlendMapTerrain;
 import com.gameengine.core.entity.terrain.TerrainTexture;
@@ -9,12 +10,10 @@ import com.gameengine.core.lighting.SpotLight;
 import com.gameengine.core.rendering.RenderManager;
 import com.gameengine.core.entity.terrain.Terrain;
 import com.gameengine.core.utils.Consts;
-import com.gameengine.core.utils.RaycastUtils;
-import com.gameengine.core.utils.Utils;
+import com.gameengine.core.utils.RaycastHit;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-import org.lwjgl.opengl.GL11;
 
 import java.util.Random;
 
@@ -28,6 +27,7 @@ public class TestGame implements ILogic {
     private SceneManager sceneManager;
     private Camera camera;
     Vector3f cameraInc;
+    private BlockBuilder blockBuilder;
 
     public TestGame() {
         renderer = new RenderManager();
@@ -36,23 +36,19 @@ public class TestGame implements ILogic {
         camera = new Camera(new Vector3f(0, 2, 0), new Vector3f(0, 0, 0));
         cameraInc = new Vector3f();
         sceneManager = new SceneManager(-90);
+        blockBuilder = new BlockBuilder(sceneManager, camera, "textures/grassblock.png");
+
     }
     @Override
     public void init() throws Exception {
         renderer.init();
+        glfwSetCursorPos(window.getWindowHandle(), GLFW_CURSOR, GLFW_CENTER_CURSOR);
         glfwSetInputMode(window.getWindowHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-//        long crosshairCursor = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
-//        glfwSetCursor(window.getWindowHandle(), crosshairCursor);
-
-
 
         // better cube rendering
         Model model = loader.loadOBJModel("/models/cube.obj");
         model.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")), 1f);
-
         model.getMaterial().setDisableCulling(true);
-
         TerrainTexture backgroundTexture = new TerrainTexture(loader.loadTexture("textures/terrain.png"));
         TerrainTexture redTexture = new TerrainTexture(loader.loadTexture("textures/flowers.png"));
         TerrainTexture greenTexture = new TerrainTexture(loader.loadTexture("textures/stone.png"));
@@ -60,26 +56,15 @@ public class TestGame implements ILogic {
         TerrainTexture blendMap = new TerrainTexture(loader.loadTexture("textures/blendMap.png"));
 
         BlendMapTerrain blendMapTerrain = new BlendMapTerrain(backgroundTexture, redTexture, greenTexture, blueTexture);
-
         // Add terrains
         Terrain terrain = new Terrain(new Vector3f(0, 0, -800), loader, new Material(
                 new Vector4f(0.0f, 0.0f, 0.0f, 0.0f), 0.1f), blendMapTerrain, blendMap);
         Terrain terrain2 = new Terrain(new Vector3f(-800, 0, -800), loader, new Material(
                 new Vector4f(0.0f, 0.0f, 0.0f, 0.0f), 0.1f), blendMapTerrain, blendMap);
-
         sceneManager.addTerrain(terrain);
         sceneManager.addTerrain(terrain2);
 
-        // Add entities
-        Random rnd = new Random();
-        for (int i = 0; i < 2000; i++) {
-            int x = (int) Math.floor(rnd.nextFloat() * 800);
-            int z = (int) Math.floor(rnd.nextFloat() * -800);
-            sceneManager.addEntity(new Entity(model, new Vector3f(x, 0.5f, z),
-                    new Vector3f(0, 0, 0), 1));
-        }
-        sceneManager.addEntity(new Entity(model, new Vector3f(0, 0.5f, -5),
-                new Vector3f(0, 0, 0), 1));
+        blockBuilder.randomBlocks();
 
         float lightIntensity = 1.0f;
         // point light
@@ -137,6 +122,7 @@ public class TestGame implements ILogic {
     }
 
     private boolean wasLeftButtonPressed = false;
+    private boolean wasRightButtonPressed = false;
     @Override
     public void update(float interval, MouseInput mouseInput) throws Exception {
         camera.movePosition(
@@ -155,27 +141,17 @@ public class TestGame implements ILogic {
         // Mouse click handling
         boolean isLeftButtonPressed = mouseInput.isLeftButtonPress();
         if (isLeftButtonPressed && !wasLeftButtonPressed) {
-            Vector3f origin = camera.getPosition();
-            Vector3f rotation = camera.getRotation();
-            double yaw = Math.toRadians(rotation.y);
-            double pitch = Math.toRadians(rotation.x);
-            Vector3f direction = new Vector3f(
-                    (float) (Math.cos(pitch) * Math.sin(yaw)),
-                    (float) -Math.sin(pitch),
-                    (float) -(Math.cos(pitch) * Math.cos(yaw))
-            ).normalize();
-
-            Vector3f pos = RaycastUtils.raycastBlockHitPosition(origin, direction, 5.0f, 0.1f, sceneManager.getEntities());
-            if (pos != null) {
-                Model model = loader.loadOBJModel("/models/cube.obj");
-                model.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")), 1f);
-                model.getMaterial().setDisableCulling(true);
-                System.out.println("building");
-                sceneManager.addEntity(new Entity(model, pos,
-                        new Vector3f(0, 0, 0), 1));
-            }
+            blockBuilder.buildBlock();
         }
         wasLeftButtonPressed = isLeftButtonPressed; // Update state for next frame
+
+        // Mouse click handling
+        boolean isRightButtonPressed = mouseInput.isRightButtonPress();
+        if (isRightButtonPressed && !wasRightButtonPressed) {
+            blockBuilder.removeBlock();
+        }
+        wasRightButtonPressed = isRightButtonPressed;
+
         sceneManager.incSpotAngle(0.75f);
         if (sceneManager.getSpotAngle() > 9600) {
             sceneManager.setSpotInc(-1);

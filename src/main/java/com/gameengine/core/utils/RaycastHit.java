@@ -5,13 +5,13 @@ import org.joml.Vector3f;
 
 import java.util.List;
 
-public class RaycastUtils {
+public class RaycastHit {
+    private static final Vector3f offset = new Vector3f(0, 0, 0);
     public static Vector3f raycastBlockHitPosition(Vector3f origin, Vector3f rayDirection, float rayLength, float stepSize, List<Entity> entities) {
+
         Entity closestEntity = null;
         float closestTMin = Float.POSITIVE_INFINITY;
         String closestFace = null;
-        Vector3f offset = new Vector3f(0, 0, 0);
-
         for (Entity entity : entities) {
             Vector3f entityPos = entity.getPos();
             float blockSize = 1.0f;
@@ -44,21 +44,20 @@ public class RaycastUtils {
                         closestTMin = t;
                         closestEntity = entity;
                         closestFace = faceName;
-                        System.out.println(normal);
                         offset.set(normal);
                     }
                 }
             }
         }
-
         if (closestEntity != null) {
-            Vector3f pos = new Vector3f(closestEntity.getPos()).add(offset);
-            // Debugging
+            Vector3f pos = new Vector3f(closestEntity.getPos());
             System.out.println("Hit entity at: " + pos + ", face: " + closestFace);
             return pos;
         }
-
         return null;
+    }
+    public static Vector3f getOffset(){
+        return offset;
     }
     public static float rayIntersectsAABB(Vector3f rayOrigin, Vector3f rayDirection, Vector3f min, Vector3f max, float rayLength) {
         Vector3f dir = new Vector3f(rayDirection).normalize();
