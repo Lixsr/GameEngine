@@ -124,98 +124,196 @@ public class TestGame implements ILogic {
             cameraInc.y = 1;
         }
     }
-    private void createBlockOnSide() throws Exception {
-        Vector3f camPosition = camera.getPosition();
-        Vector3f camRotation = camera.getRotation();
-
-        // Direction based on camera rotation
-        Vector3f camDirection = new Vector3f(
-                (float) -Math.sin(Math.toRadians(camRotation.y)),
-                (float) Math.sin(Math.toRadians(camRotation.x)),
-                (float) -Math.cos(Math.toRadians(camRotation.y))
-        );
-
-        // Ray cast distance and step
-        float rayLength = 5.0f;
-        float stepSize = 0.1f;
-        Vector3f checkPosition = new Vector3f(camPosition);
-
-        Entity hitEntity = null;
-
-        for (float i = 0; i < rayLength; i += stepSize) {
-            checkPosition.add(new Vector3f(camDirection).mul(stepSize));
-            float detectionRadius = 0.5f; // Adjust based on block size
-
-            for (Entity entity : sceneManager.getEntities()) {
-                Vector3f entityPos = entity.getPos();
-                if (entityPos.distance(entityPos) <= detectionRadius) {
-                    hitEntity = entity;
-                }
-            }
-            if (hitEntity != null) break;
-        }
-
-        if (hitEntity != null) {
-            Vector3f hitPos = new Vector3f(hitEntity.getPos());
-            Vector3f newBlockPos = new Vector3f(hitPos).add(camDirection.normalize());
-
-            Model blockModel = loader.loadOBJModel("/models/cube.obj");
-            blockModel.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")), 1f);
-            blockModel.getMaterial().setDisableCulling(true);
-
-            Entity newBlock = new Entity(blockModel, newBlockPos, new Vector3f(0, 0, 0), 1);
-            sceneManager.addEntity(newBlock);
-        }
-    }
-    public Vector3f raycastBlockHitPosition(Vector3f origin, Vector3f direction, float rayLength, float stepSize) {
-        Vector3f currentPos = new Vector3f(origin);
-        Vector3f step = new Vector3f(direction).normalize().mul(stepSize);
-        for (float i = 0; i < rayLength; i += stepSize) {
-            currentPos.add(step);
-            Entity entity = getEntityAtPosition(currentPos);
-            if (entity != null) {
-                System.out.println(entity.getPos());
-                return new Vector3f(entity.getPos());
-            }
-        }
-
-        return null; // No hit
-    }
-    public Entity getEntityAtPosition(Vector3f position) {
-        float detectionRadius = 3f;
+    public Vector3f raycastBlockHitPosition(Vector3f origin, Vector3f rayDirection, float rayLength, float stepSize) {
+        Entity closestEntity = null;
+        float closestTMin = Float.POSITIVE_INFINITY;
+        String closestFace = null;
 
         for (Entity entity : sceneManager.getEntities()) {
             Vector3f entityPos = entity.getPos();
+            float blockSize = 1.0f;
+            Vector3f min = new Vector3f(entityPos).sub(blockSize / 2.0f, blockSize / 2.0f, blockSize / 2.0f);
+            Vector3f max = new Vector3f(entityPos).add(blockSize / 2.0f, blockSize / 2.0f, blockSize / 2.0f);
 
-            // If your entities are snapped to a grid, you can round the float
-            if (Math.abs(entityPos.x - position.x) <= detectionRadius &&
-                    Math.abs(entityPos.y - position.y) <= detectionRadius &&
-                    Math.abs(entityPos.z - position.z) <= detectionRadius) {
-                return entity;
+            // Quick AABB check to skip non-intersecting blocks
+            if (rayIntersectsAABB(origin, rayDirection, min, max, rayLength) < 0) {
+                continue;
+            }
+
+            // Define the six faces of the AABB
+            Vector3f[] faceNormals = {
+                    new Vector3f(1, 0, 0),  // Right (+x)
+                    new Vector3f(-1, 0, 0), // Left (-x)
+                    new Vector3f(0, 1, 0),  // Top (+y)
+                    new Vector3f(0, -1, 0), // Bottom (-y)
+                    new Vector3f(0, 0, 1),  // Front (+z)
+                    new Vector3f(0, 0, -1)  // Back (-z)
+            };
+            Vector3f[] facePoints = {
+                    new Vector3f(max.x, entityPos.y, entityPos.z), // Right
+                    new Vector3f(min.x, entityPos.y, entityPos.z), // Left
+                    new Vector3f(entityPos.x, max.y, entityPos.z), // Top
+                    new Vector3f(entityPos.x, min.y, entityPos.z), // Bottom
+                    new Vector3f(entityPos.x, entityPos.y, max.z), // Front
+                    new Vector3f(entityPos.x, entityPos.y, min.z)  // Back
+            };
+            String[] faceNames = {"right", "left", "top", "bottom", "front", "back"};
+
+            // Check each face
+            for (int i = 0; i < 6; i++) {
+                Vector3f normal = faceNormals[i];
+                Vector3f pointOnPlane = facePoints[i];
+                String faceName = faceNames[i];
+
+                float t = rayPlaneIntersection(origin, rayDirection, normal, pointOnPlane);
+                if (t >= 0 && t <= rayLength && t < closestTMin) {
+                    Vector3f hitPoint = new Vector3f(rayDirection).mul(t).add(origin);
+                    if (isPointOnFace(hitPoint, min, max, i)) {
+                        closestTMin = t;
+                        closestEntity = entity;
+                        closestFace = faceName;
+                    }
+                }
             }
         }
+
+        if (closestEntity != null) {
+            System.out.println("Hit entity at: " + closestEntity.getPos() + ", face: " + closestFace);
+            return new Vector3f(closestEntity.getPos());
+        }
+
         return null;
     }
+    private float rayPlaneIntersection(Vector3f rayOrigin, Vector3f rayDirection, Vector3f planeNormal, Vector3f pointOnPlane) {
+        Vector3f dir = new Vector3f(rayDirection).normalize();
+        float denom = planeNormal.dot(dir);
+        if (Math.abs(denom) < 1e-4) { // Increase tolerance
+            return -1;
+        }
+        Vector3f vec = new Vector3f(pointOnPlane).sub(rayOrigin);
+        float t = vec.dot(planeNormal) / denom;
+        if (t >= 0) {
+            return t;
+        }
+        return -1;
+    }
+    private boolean isPointOnFace(Vector3f hitPoint, Vector3f min, Vector3f max, int faceIndex) {
+        float epsilon = 1e-4f; // Increase tolerance
 
+        switch (faceIndex) {
+            case 0: // Right (+x)
+                return Math.abs(hitPoint.x - max.x) < epsilon &&
+                        hitPoint.y >= min.y - epsilon && hitPoint.y <= max.y + epsilon &&
+                        hitPoint.z >= min.z - epsilon && hitPoint.z <= max.z + epsilon;
+            case 1: // Left (-x)
+                return Math.abs(hitPoint.x - min.x) < epsilon &&
+                        hitPoint.y >= min.y - epsilon && hitPoint.y <= max.y + epsilon &&
+                        hitPoint.z >= min.z - epsilon && hitPoint.z <= max.z + epsilon;
+            case 2: // Top (+y)
+                return Math.abs(hitPoint.y - max.y) < epsilon &&
+                        hitPoint.x >= min.x - epsilon && hitPoint.x <= max.x + epsilon &&
+                        hitPoint.z >= min.z - epsilon && hitPoint.z <= max.z + epsilon;
+            case 3: // Bottom (-y)
+                return Math.abs(hitPoint.y - min.y) < epsilon &&
+                        hitPoint.x >= min.x - epsilon && hitPoint.x <= max.x + epsilon &&
+                        hitPoint.z >= min.z - epsilon && hitPoint.z <= max.z + epsilon;
+            case 4: // Front (+z)
+                return Math.abs(hitPoint.z - max.z) < epsilon &&
+                        hitPoint.x >= min.x - epsilon && hitPoint.x <= max.x + epsilon &&
+                        hitPoint.y >= min.y - epsilon && hitPoint.y <= max.y + epsilon;
+            case 5: // Back (-z)
+                return Math.abs(hitPoint.z - min.z) < epsilon &&
+                        hitPoint.x >= min.x - epsilon && hitPoint.x <= max.x + epsilon &&
+                        hitPoint.y >= min.y - epsilon && hitPoint.y <= max.y + epsilon;
+            default:
+                return false;
+        }
+    }
+
+    // Helper method for ray-AABB intersection
+    private float rayIntersectsAABB(Vector3f rayOrigin, Vector3f rayDirection, Vector3f min, Vector3f max, float rayLength) {
+        Vector3f dir = new Vector3f(rayDirection).normalize();
+        Vector3f invDir = new Vector3f(
+                Math.abs(dir.x) > 1e-6 ? 1.0f / dir.x : (dir.x >= 0 ? Float.POSITIVE_INFINITY : Float.NEGATIVE_INFINITY),
+                Math.abs(dir.y) > 1e-6 ? 1.0f / dir.y : (dir.y >= 0 ? Float.POSITIVE_INFINITY : Float.NEGATIVE_INFINITY),
+                Math.abs(dir.z) > 1e-6 ? 1.0f / dir.z : (dir.z >= 0 ? Float.POSITIVE_INFINITY : Float.NEGATIVE_INFINITY)
+        );
+
+        float tMin = (min.x - rayOrigin.x) * invDir.x;
+        float tMax = (max.x - rayOrigin.x) * invDir.x;
+        if (tMin > tMax) {
+            float temp = tMin;
+            tMin = tMax;
+            tMax = temp;
+        }
+
+        float tYMin = (min.y - rayOrigin.y) * invDir.y;
+        float tYMax = (max.y - rayOrigin.y) * invDir.y;
+        if (tYMin > tYMax) {
+            float temp = tYMin;
+            tYMin = tYMax;
+            tYMax = temp;
+        }
+
+        if (tMin > tYMax || tYMin > tMax) {
+            return -1;
+        }
+
+        tMin = Math.max(tMin, tYMin);
+        tMax = Math.min(tMax, tYMax);
+
+        float tZMin = (min.z - rayOrigin.z) * invDir.z;
+        float tZMax = (max.z - rayOrigin.z) * invDir.z;
+        if (tZMin > tZMax) {
+            float temp = tZMin;
+            tZMin = tZMax;
+            tZMax = temp;
+        }
+
+        if (tMin > tZMax || tZMin > tMax) {
+            return -1;
+        }
+
+        tMin = Math.max(tMin, tZMin);
+        tMax = Math.min(tMax, tZMax);
+
+        if (tMin >= 0 && tMin <= rayLength) {
+            return tMin;
+        }
+
+        return -1;
+    }
 
     private boolean wasLeftButtonPressed = false;
     @Override
     public void update(float interval, MouseInput mouseInput) throws Exception {
-        camera.movePosition(cameraInc.x * Consts.CAMERA_MOVE_SPEED, cameraInc.y * Consts.CAMERA_MOVE_SPEED, cameraInc.z * Consts.CAMERA_MOVE_SPEED);
+        camera.movePosition(
+                cameraInc.x * Consts.CAMERA_MOVE_SPEED,
+                cameraInc.y * Consts.CAMERA_MOVE_SPEED,
+                cameraInc.z * Consts.CAMERA_MOVE_SPEED
+        );
 
         Vector2f rotVec = mouseInput.getDisplVec();
-        camera.moveRotation(rotVec.x * Consts.MOUSE_SENSITIVITY, rotVec.y * Consts.MOUSE_SENSITIVITY, 0);
+        camera.moveRotation(
+                rotVec.x * Consts.MOUSE_SENSITIVITY,
+                rotVec.y * Consts.MOUSE_SENSITIVITY,
+                0
+        );
 
         // Mouse click handling
         boolean isLeftButtonPressed = mouseInput.isLeftButtonPress();
-        if (isLeftButtonPressed && !wasLeftButtonPressed) { // Detect transition to pressed
+        if (isLeftButtonPressed && !wasLeftButtonPressed) {
             Vector3f origin = camera.getPosition();
             Vector3f rotation = camera.getRotation();
+
+            double yaw = Math.toRadians(rotation.y);
+            double pitch = Math.toRadians(rotation.x);
+
             Vector3f direction = new Vector3f(
-                    (float) -Math.sin(Math.toRadians(rotation.y)),
-                    (float) Math.sin(Math.toRadians(rotation.x)),
-                    (float) -Math.cos(Math.toRadians(rotation.y))
-            );
+                    (float) (Math.cos(pitch) * Math.sin(yaw)),
+                    (float) -Math.sin(pitch),
+                    (float) -(Math.cos(pitch) * Math.cos(yaw))
+            ).normalize();
             System.out.println("Block touched at " + raycastBlockHitPosition(origin, direction, 5.0f, 0.1f));
         }
         wasLeftButtonPressed = isLeftButtonPressed; // Update state for next frame
