@@ -14,6 +14,8 @@ public class Consts {
     public static final int MAX_POINT_LIGHTS = 5;
     public static final float SIZE = 800.0f;
     public static final float ROTATION_SPEED = 90.0f;
+    public static final float MOVEMENT_SPEED = 2f;
+
 
 
 
