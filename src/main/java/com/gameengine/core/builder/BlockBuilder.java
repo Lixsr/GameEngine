@@ -93,6 +93,13 @@ public class BlockBuilder {
             }
         }
     }
+    public void removeBlockWithoutAnimation () throws Exception {
+        Vector3f origin = camera.getPosition();
+        Vector3f pos = RaycastHit.raycastBlockHitPosition(origin, getDirection(), 15.0f, 0.1f, sceneManager);
+        if (pos != null) {
+            sceneManager.removeEntity(pos);
+        }
+    }
     public void randomBlocks () throws Exception {
         Model model = getModel();
         // Add entities

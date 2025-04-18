@@ -116,10 +116,12 @@ public class TestGame implements ILogic {
         if (window.isKeyPressed(GLFW_KEY_E)) {
             cameraInc.y = 1;
         }
+
     }
 
     private boolean wasLeftButtonPressed = false;
     private boolean wasRightButtonPressed = false;
+    private boolean wasRPressed = false;
     @Override
     public void update(float interval, MouseInput mouseInput) throws Exception {
         camera.movePosition(
@@ -133,7 +135,11 @@ public class TestGame implements ILogic {
                 rotVec.y * Consts.MOUSE_SENSITIVITY,
                 0
         );
-
+        boolean isRPressed = window.isKeyPressed(GLFW_KEY_R);
+        if (isRPressed && !wasRPressed) {
+            blockBuilder.removeBlockWithoutAnimation();
+        }
+        wasRPressed = isRPressed;
         // Mouse click handling
         boolean isLeftButtonPressed = mouseInput.isLeftButtonPress();
         if (isLeftButtonPressed && !wasLeftButtonPressed) {

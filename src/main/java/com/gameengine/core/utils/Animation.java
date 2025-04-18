@@ -9,12 +9,12 @@ import java.util.TimerTask;
 public class Animation {
     public static void explosion(Entity entity, float speed, Vector3f dir) {
         Timer timer = new Timer();
-        float duration = 1000.0f; // 2 seconds
+        float duration = 1000.0f;
 
         Vector3f start = new Vector3f(entity.getPos());
         Vector3f end = new Vector3f(start).add(new Vector3f(dir).mul(speed));
         Vector3f control = new Vector3f(start).add(new Vector3f(dir).mul(speed));
-        control.y += 2.0f; // Add arc
+        control.y += 2.0f;
 
         TimerTask task = new TimerTask() {
             int bounceCount = 0;
@@ -54,7 +54,7 @@ public class Animation {
     public static void rotateOverTime(Entity entity, float rotationSpeed) {
         Timer timer = new Timer();
         long startTime = System.currentTimeMillis();
-        float duration = 10000; // 2 seconds in milliseconds
+        float duration = 100000; // 2 seconds in milliseconds
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
@@ -62,14 +62,14 @@ public class Animation {
                 float elapsedTime = (currentTime - startTime) / 1000.0f; // Convert to seconds
                 if (elapsedTime <= duration / 1000.0f) {
                     // Apply rotation for 10ms interval
-                    float rotationAmount = rotationSpeed * 0.01f; // 10ms = 0.01s
+                    float rotationAmount = rotationSpeed/3 * 0.01f; // 10ms = 0.01s
                     entity.incRotation(0, rotationAmount, 0);
                 } else {
                     timer.cancel(); // Stop the timer after 2 seconds
                 }
             }
         };
-        timer.scheduleAtFixedRate(task, 0, 3); // Run every 10ms
+        timer.scheduleAtFixedRate(task, 0, 1); // Run every 10ms
     }
 
 }
