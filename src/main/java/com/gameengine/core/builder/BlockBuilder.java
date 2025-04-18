@@ -25,7 +25,7 @@ public class BlockBuilder {
     }
     public void buildBlock () throws Exception {
         Vector3f origin = camera.getPosition();
-        Vector3f pos = RaycastHit.raycastBlockHitPosition(origin, getDirection(), 15.0f, 0.1f, sceneManager.getEntities());
+        Vector3f pos = RaycastHit.raycastBlockHitPosition(origin, getDirection(), 10.0f, 0.1f, sceneManager);
         Model model = getModel();
         if (pos != null) {
              sceneManager.addEntity(new Entity(model, pos.add(RaycastHit.getOffset()),
@@ -35,7 +35,7 @@ public class BlockBuilder {
 
     public void removeBlock () throws Exception {
         Vector3f origin = camera.getPosition();
-        Vector3f pos = RaycastHit.raycastBlockHitPosition(origin, getDirection(), 15.0f, 0.1f, sceneManager.getEntities());
+        Vector3f pos = RaycastHit.raycastBlockHitPosition(origin, getDirection(), 15.0f, 0.1f, sceneManager);
         if (pos != null) {
             sceneManager.removeEntity(pos);
         }
@@ -47,10 +47,10 @@ public class BlockBuilder {
         for (int i = 0; i < 2000; i++) {
             int x = (int) Math.floor(rnd.nextFloat() * 800);
             int z = (int) Math.floor(rnd.nextFloat() * -800);
-            sceneManager.addEntity(new Entity(model, new Vector3f(x, 0.5f, z),
+            sceneManager.addEntity(new Entity(model, new Vector3f(x, 0f, z),
                     new Vector3f(0, 0, 0), 1));
         }
-        sceneManager.addEntity(new Entity(model, new Vector3f(0, 0.5f, -5),
+        sceneManager.addEntity(new Entity(model, new Vector3f(0, 0f, -5),
                 new Vector3f(0, 0, 0), 1));
     }
 

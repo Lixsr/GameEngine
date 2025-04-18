@@ -1,20 +1,20 @@
 package com.gameengine.core.utils;
 
 import com.gameengine.core.entity.Entity;
+import com.gameengine.core.entity.SceneManager;
+import com.gameengine.core.entity.terrain.Terrain;
 import org.joml.Vector3f;
 
 import java.util.List;
 
 public class RaycastHit {
     private static final Vector3f offset = new Vector3f(0, 0, 0);
-    public static Vector3f raycastBlockHitPosition(Vector3f origin, Vector3f rayDirection, float rayLength, float stepSize, List<Entity> entities) {
-
+    public static Vector3f raycastBlockHitPosition(Vector3f origin, Vector3f rayDirection, float rayLength, float stepSize, SceneManager sceneManager) {
+        float blockSize = 1.0f;
         Entity closestEntity = null;
         float closestTMin = Float.POSITIVE_INFINITY;
-        String closestFace = null;
-        for (Entity entity : entities) {
+        for (Entity entity : sceneManager.getEntities()) {
             Vector3f entityPos = entity.getPos();
-            float blockSize = 1.0f;
             Vector3f min = new Vector3f(entityPos).sub(blockSize / 2.0f, blockSize / 2.0f, blockSize / 2.0f);
             Vector3f max = new Vector3f(entityPos).add(blockSize / 2.0f, blockSize / 2.0f, blockSize / 2.0f);
 
@@ -35,24 +35,34 @@ public class RaycastHit {
             for (int i = 0; i < 6; i++) {
                 Vector3f normal = Consts.faceNormals[i];
                 Vector3f pointOnPlane = facePoints[i];
-                String faceName = Consts.faceNames[i];
-
                 float t = rayPlaneIntersection(origin, rayDirection, normal, pointOnPlane);
                 if (t >= 0 && t <= rayLength && t < closestTMin) {
                     Vector3f hitPoint = new Vector3f(rayDirection).mul(t).add(origin);
                     if (isPointOnFace(hitPoint, min, max, i)) {
                         closestTMin = t;
                         closestEntity = entity;
-                        closestFace = faceName;
                         offset.set(normal);
                     }
                 }
             }
         }
+
+        for (Terrain terrain : sceneManager.getTerrains()) {
+            if (closestEntity == null) {
+                Vector3f groundNormal = new Vector3f(0, 1f, 0);
+                Vector3f groundPoint = terrain.getPosition();
+                float t = rayPlaneIntersection(origin, rayDirection, groundNormal, groundPoint);
+                if (t >= 0 && t <= rayLength) {
+                    Vector3f hitPoint = new Vector3f(rayDirection).mul(t).add(origin);
+                    float snappedX = Math.round(hitPoint.x);
+                    float snappedZ = Math.round(hitPoint.z);
+                    offset.set(0);
+                    return new Vector3f(snappedX, 0f, snappedZ);
+                }
+            }
+        }
         if (closestEntity != null) {
-            Vector3f pos = new Vector3f(closestEntity.getPos());
-            System.out.println("Hit entity at: " + pos + ", face: " + closestFace);
-            return pos;
+            return new Vector3f(closestEntity.getPos());
         }
         return null;
     }

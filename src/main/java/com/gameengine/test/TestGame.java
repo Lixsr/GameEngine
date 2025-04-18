@@ -57,12 +57,9 @@ public class TestGame implements ILogic {
 
         BlendMapTerrain blendMapTerrain = new BlendMapTerrain(backgroundTexture, redTexture, greenTexture, blueTexture);
         // Add terrains
-        Terrain terrain = new Terrain(new Vector3f(0, 0, -800), loader, new Material(
-                new Vector4f(0.0f, 0.0f, 0.0f, 0.0f), 0.1f), blendMapTerrain, blendMap);
-        Terrain terrain2 = new Terrain(new Vector3f(-800, 0, -800), loader, new Material(
+        Terrain terrain = new Terrain(new Vector3f(-300.5f, -0.5f, -800.5f), loader, new Material(
                 new Vector4f(0.0f, 0.0f, 0.0f, 0.0f), 0.1f), blendMapTerrain, blendMap);
         sceneManager.addTerrain(terrain);
-        sceneManager.addTerrain(terrain2);
 
         blockBuilder.randomBlocks();
 
@@ -130,7 +127,6 @@ public class TestGame implements ILogic {
                 cameraInc.y * Consts.CAMERA_MOVE_SPEED,
                 cameraInc.z * Consts.CAMERA_MOVE_SPEED
         );
-
         Vector2f rotVec = mouseInput.getDisplVec();
         camera.moveRotation(
                 rotVec.x * Consts.MOUSE_SENSITIVITY,
@@ -190,7 +186,6 @@ public class TestGame implements ILogic {
         for (Entity entity : sceneManager.getEntities()) {
             renderer.processEntity(entity);
         }
-
         for (Terrain terrain : sceneManager.getTerrains()) {
             renderer.processTerrain(terrain);
         }
