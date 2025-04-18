@@ -44,7 +44,8 @@ public class RaycastUtils {
                         closestTMin = t;
                         closestEntity = entity;
                         closestFace = faceName;
-                        offset.add(normal);
+                        System.out.println(normal);
+                        offset.set(normal);
                     }
                 }
             }
