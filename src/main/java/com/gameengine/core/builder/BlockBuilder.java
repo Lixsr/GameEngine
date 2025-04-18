@@ -6,6 +6,8 @@ import com.gameengine.core.entity.Entity;
 import com.gameengine.core.entity.Model;
 import com.gameengine.core.entity.SceneManager;
 import com.gameengine.core.entity.Texture;
+import com.gameengine.core.utils.Animation;
+import com.gameengine.core.utils.Consts;
 import com.gameengine.core.utils.RaycastHit;
 import org.joml.Vector3f;
 
@@ -37,7 +39,8 @@ public class BlockBuilder {
         Vector3f origin = camera.getPosition();
         Vector3f pos = RaycastHit.raycastBlockHitPosition(origin, getDirection(), 15.0f, 0.1f, sceneManager);
         if (pos != null) {
-            sceneManager.removeEntity(pos);
+//            sceneManager.removeEntity(pos);
+            Animation.rotateOverTime(sceneManager.getEntity(pos), Consts.ROTATION_SPEED);
         }
     }
     public void randomBlocks () throws Exception {

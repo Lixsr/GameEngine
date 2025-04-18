@@ -13,6 +13,8 @@ public class Consts {
     public static final int MAX_SPOT_LIGHTS = 5;
     public static final int MAX_POINT_LIGHTS = 5;
     public static final float SIZE = 800.0f;
+    public static final float ROTATION_SPEED = 90.0f;
+
 
 
     public static final float SPECULAR_POWER = 10f;

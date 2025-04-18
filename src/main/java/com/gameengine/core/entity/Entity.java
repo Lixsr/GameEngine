@@ -2,6 +2,9 @@ package com.gameengine.core.entity;
 
 import org.joml.Vector3f;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class Entity {
     private Model model;
     private Vector3f pos, rotation;
@@ -37,13 +40,11 @@ public class Entity {
         this.rotation.y += y;
         this.rotation.z += z;
     }
-
     public void setRotation(float x, float y, float z){
         this.rotation.x = x;
         this.rotation.y = y;
         this.rotation.z = z;
     }
-
     public Model getModel() {
         return model;
     }
